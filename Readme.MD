@@ -24,4 +24,6 @@
 ### Cell highlight
 
 ## Phase 1 - Prototype
+[![Editor & PlayMode Tests](https://github.com/martin-obert/a-star-test/actions/workflows/run_tests.yml/badge.svg?event=push)](https://github.com/martin-obert/a-star-test/actions/workflows/run_tests.yml)
+
 - automatically generate grid upon scene load
