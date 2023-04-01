@@ -1,13 +1,16 @@
 using System.Collections.Generic;
 using PathFinding;
+using UnityEngine;
 
 namespace Grid
 {
     /// <summary>
     /// Implementation of a <see cref="IAStarNode"/>
     /// </summary>
-    public sealed class GridCell : IAStarNode
+    public sealed class GridCell : IAStarNode, IGridCell
     {
+        public Vector2Int GridPosition { get; set; }
+        
         public IEnumerable<IAStarNode> Neighbours { get; }
         
         public float CostTo(IAStarNode neighbour)
