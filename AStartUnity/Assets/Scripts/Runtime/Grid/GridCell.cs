@@ -11,9 +11,19 @@ namespace Runtime.Grid
     public sealed class GridCell : IAStarNode, IGridCell
     {
         /// <summary>
-        /// Defines position of this cell in grid.
-        /// ROW Index = <see cref="Vector2Int.x"/>
-        /// COL Index = <see cref="Vector2Int.y"/>
+        /// <list type="bullet">
+        ///     <listheader>
+        ///         Defines position of this cell in grid.
+        ///     </listheader>
+        ///     <item>
+        ///         <term>Vector2Int.y </term>
+        ///         <description>COL Index</description>
+        ///     </item>
+        ///     <item>
+        ///         <term>Vector2Int.x </term>
+        ///         <description>ROW Index</description>
+        ///     </item>
+        /// </list>
         /// </summary>
         public Vector2Int GridPosition { get; set; }
         
