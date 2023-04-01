@@ -15,7 +15,8 @@ namespace Grid
                 {
                     result[row * colCount + col] = new GridCell
                     {
-                        GridPosition = new Vector2Int(col, row)
+                        RowIndex = row,
+                        ColIndex = col
                     };
                 }
             }

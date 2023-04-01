@@ -6,6 +6,7 @@ namespace Grid
 {
     public interface IGridCell
     {
-        Vector2Int GridPosition { get; set; }
+        int RowIndex { get; set; }
+        int ColIndex { get; set; }
     }
 }

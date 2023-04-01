@@ -11,28 +11,22 @@ namespace Runtime.Grid
     public sealed class GridCell : IAStarNode, IGridCell
     {
         /// <summary>
-        /// <list type="bullet">
-        ///     <listheader>
-        ///         Defines position of this cell in grid.
-        ///     </listheader>
-        ///     <item>
-        ///         <term>Vector2Int.y </term>
-        ///         <description>COL Index</description>
-        ///     </item>
-        ///     <item>
-        ///         <term>Vector2Int.x </term>
-        ///         <description>ROW Index</description>
-        ///     </item>
-        /// </list>
+        /// Row position on the grid
         /// </summary>
-        public Vector2Int GridPosition { get; set; }
+        public int RowIndex { get; set; }
+
+        /// <summary>
+        /// Column position on the grid
+        /// </summary>
+        public int ColIndex { get; set; }
         
         public IEnumerable<IAStarNode> Neighbours { get; }
-        
+
         public float CostTo(IAStarNode neighbour)
         {
             throw new System.NotImplementedException();
         }
+
 
         public float EstimatedCostTo(IAStarNode target)
         {
