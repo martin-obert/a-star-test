@@ -10,6 +10,11 @@ namespace Runtime.Grid
     /// </summary>
     public sealed class GridCell : IAStarNode, IGridCell
     {
+        /// <summary>
+        /// Defines position of this cell in grid.
+        /// ROW Index = <see cref="Vector2Int.x"/>
+        /// COL Index = <see cref="Vector2Int.y"/>
+        /// </summary>
         public Vector2Int GridPosition { get; set; }
         
         public IEnumerable<IAStarNode> Neighbours { get; }
