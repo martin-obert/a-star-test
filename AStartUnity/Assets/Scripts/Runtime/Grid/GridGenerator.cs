@@ -1,4 +1,5 @@
 ﻿using Runtime.Grid;
+using Runtime.Grid.Data;
 using UnityEngine;
 
 namespace Grid
@@ -7,6 +8,8 @@ namespace Grid
     {
         public static IGridCell[] GenerateGrid(int rowCount, int colCount)
         {
+            // TODO: check args for negative values
+            
             var result = new IGridCell[rowCount * colCount];
             
             for (var row = 0; row < rowCount; row++)

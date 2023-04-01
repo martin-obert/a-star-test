@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace Grid
+﻿namespace Runtime.Grid.Data
 {
     public interface IGridCell
     {
