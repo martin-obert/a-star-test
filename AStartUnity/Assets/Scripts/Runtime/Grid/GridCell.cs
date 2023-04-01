@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using Grid;
 using PathFinding;
 using UnityEngine;
 
-namespace Grid
+namespace Runtime.Grid
 {
     /// <summary>
     /// Implementation of a <see cref="IAStarNode"/>

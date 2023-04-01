@@ -1,0 +1,16 @@
+{
+    "name": "Obert.AStar",
+    "rootNamespace": "",
+    "references": [
+        "GUID:1b90d9d8f1c2f7046a74ff6be5f4aad7"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
