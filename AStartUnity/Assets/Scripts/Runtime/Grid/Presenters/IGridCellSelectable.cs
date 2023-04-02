@@ -1,10 +1,9 @@
-﻿using UnityEngine;
-
+﻿
 namespace Runtime.Grid.Presenters
 {
-    public interface IGridCellSelectable
+    public interface IGridCellSelectable : IGridCellHoverable
     {
-        bool IsBoxCastHit(Vector2 cursor);
-        bool IsCircleCastHit(Vector2 cursor);
+        bool IsSelected { get;  }
+        void ToggleSelection(bool? value = null);
     }
 }

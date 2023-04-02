@@ -6,6 +6,7 @@ using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.UIElements;
 
 namespace Runtime.Grid.Services
 {
@@ -65,10 +66,18 @@ namespace Runtime.Grid.Services
 
             if (hoveredCell is IGridCellHoverable hoverable)
             {
-                if (hoverable == _lastHovered) return;
-                _lastHovered?.OnCursorExit();
-                _lastHovered = hoverable;
-                _lastHovered?.OnCursorEnter();
+                if (Input.GetMouseButtonDown((int)MouseButton.LeftMouse) && hoverable is IGridCellSelectable selectable)
+                {
+                    selectable.ToggleSelection();
+                    _lastHovered = null;
+                }
+                else
+                {
+                    if (hoverable == _lastHovered) return;
+                    _lastHovered?.OnCursorExit();
+                    _lastHovered = hoverable;
+                    _lastHovered?.OnCursorEnter();    
+                }
             }
             else 
             {
