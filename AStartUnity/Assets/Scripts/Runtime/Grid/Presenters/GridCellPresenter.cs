@@ -9,10 +9,13 @@ namespace Runtime.Grid.Presenters
     public sealed class GridCellPresenter : MonoBehaviour, IGridCellSelectable, IGridCellHoverable
     {
         [SerializeField] private Color hoverColor = Color.yellow;
-        
+        [SerializeField] private Color selectionColor = Color.green;
+
         private IGridCell _cell;
+
         // TODO: this should be false for non-walkable terrain
         public bool CanHover => true;
+        private MaterialPropertyBlock _selectedState;
         private MaterialPropertyBlock _hoverState;
         private MaterialPropertyBlock _normalState;
         private static readonly int BaseColorProp = Shader.PropertyToID("_Color");
@@ -21,12 +24,14 @@ namespace Runtime.Grid.Presenters
         private void Awake()
         {
             _renderer = GetComponent<Renderer>();
-            
+
             Assert.IsNotNull(_renderer, "_renderer != null");
-            
+
+            _selectedState = new MaterialPropertyBlock();
             _hoverState = new MaterialPropertyBlock();
             _normalState = new MaterialPropertyBlock();
-            
+
+            _selectedState.SetColor(BaseColorProp, selectionColor);
             _hoverState.SetColor(BaseColorProp, hoverColor);
             _normalState.SetColor(BaseColorProp, _renderer.material.GetColor(BaseColorProp));
         }
@@ -36,7 +41,6 @@ namespace Runtime.Grid.Presenters
             _cell = cell;
             name = $"row: {cell.RowIndex}, col: {cell.ColIndex}";
             transform.position = cell.WorldPosition;
-
         }
 
         public bool IsBoxCastHit(Vector2 cursor)
@@ -66,15 +70,25 @@ namespace Runtime.Grid.Presenters
             double value = (dx * dx) / (a * a) + (dy * dy) / (b * b);
             return value <= 1;
         }
-     
+
         public void OnCursorEnter()
         {
+            if(IsSelected) return;
             _renderer.SetPropertyBlock(_hoverState);
         }
 
         public void OnCursorExit()
         {
+            if(IsSelected) return;
             _renderer.SetPropertyBlock(_normalState);
+        }
+
+        public bool IsSelected { get; private set; }
+
+        public void ToggleSelection(bool? value = null)
+        {
+            IsSelected = !IsSelected;
+            _renderer.SetPropertyBlock(IsSelected ? _selectedState : _normalState);
         }
     }
 }
