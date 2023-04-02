@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Grid;
 using PathFinding;
+using Runtime.Grid.Presenters;
+using UnityEngine;
 
 namespace Runtime.Grid.Data
 {
@@ -18,9 +20,15 @@ namespace Runtime.Grid.Data
         /// Column position on the grid
         /// </summary>
         public int ColIndex { get; set; }
-        
+
+        public bool IsOddRow => GridCellCoordsHelpers.IsCellOdd(RowIndex);
+        public Vector3 WorldPosition { get; set; }
+        public float HeightHalf { get; set; }
+        public float WidthHalf { get; set; }
+       
         public IEnumerable<IAStarNode> Neighbours { get; }
 
+        
         public float CostTo(IAStarNode neighbour)
         {
             throw new System.NotImplementedException();

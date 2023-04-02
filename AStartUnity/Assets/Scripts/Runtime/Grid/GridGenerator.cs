@@ -1,5 +1,6 @@
 ﻿using Runtime.Grid;
 using Runtime.Grid.Data;
+using Runtime.Grid.Presenters;
 using UnityEngine;
 
 namespace Grid
@@ -19,7 +20,8 @@ namespace Grid
                     result[row * colCount + col] = new GridCell
                     {
                         RowIndex = row,
-                        ColIndex = col
+                        ColIndex = col,
+                        WorldPosition = GridCellCoordsHelpers.ToWorldCoords(row, col)
                     };
                 }
             }
