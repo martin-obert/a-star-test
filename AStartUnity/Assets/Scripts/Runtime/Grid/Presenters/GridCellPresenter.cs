@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Runtime.Grid.Presenters
 {
-    public sealed class GridCellPresenter : MonoBehaviour
+    public sealed class GridCellPresenter : MonoBehaviour, IGridCellSelectable
     {
         private IGridCell _cell;
 

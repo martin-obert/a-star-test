@@ -11,8 +11,11 @@ namespace Runtime.Grid.Services
 {
     public sealed class GridManager : MonoBehaviour, IGridManager
     {
+        [SerializeField]
+        private Transform debugPoint;
+        private readonly IGridRaycaster _gridRaycaster = new GridRaycaster();
         public IGridCell[] CurrentCells { get; private set; }
-        public List<GridCellPresenter> Presenters { get; private set; } = new List<GridCellPresenter>();
+        public List<GridCellPresenter> Presenters { get; } = new();
 
         [SerializeField] private int rowCount = 1;
         [SerializeField] private int colCount = 1;
@@ -44,6 +47,20 @@ namespace Runtime.Grid.Services
             }
         }
 
-
+        // TODO: this is only temporary for debug purposes
+        private void Update()
+        {
+            var ray = _gridRaycaster.GetRayFromMousePosition();
+            
+            if (!_gridRaycaster.TryGetHitOnGrid(ray, out var hitPoint)) return;
+            
+            if (debugPoint)
+            {
+                debugPoint.position = hitPoint;
+            }
+            var selectedCell =
+                GridCellCoordsHelpers.GetCellByWorldPoint(new Vector2(hitPoint.x, hitPoint.z), Presenters);
+            Debug.Log(selectedCell);
+        }
     }
 }
