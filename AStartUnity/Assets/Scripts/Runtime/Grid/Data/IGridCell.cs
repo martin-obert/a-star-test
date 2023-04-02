@@ -2,7 +2,7 @@
 
 namespace Runtime.Grid.Data
 {
-    public interface IGridCell
+    public interface IGridCell 
     {
         int RowIndex { get; }
         int ColIndex { get; }

@@ -21,7 +21,9 @@ namespace Grid
                     {
                         RowIndex = row,
                         ColIndex = col,
-                        WorldPosition = GridCellCoordsHelpers.ToWorldCoords(row, col)
+                        WorldPosition = GridCellCoordsHelpers.ToWorldCoords(row, col),
+                        HeightHalf = GridDefinitions.HeightRadius,
+                        WidthHalf = GridDefinitions.WidthRadius
                     };
                 }
             }
