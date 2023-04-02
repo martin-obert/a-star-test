@@ -1,8 +1,15 @@
-﻿namespace Runtime.Grid.Data
+﻿using UnityEngine;
+
+namespace Runtime.Grid.Data
 {
     public interface IGridCell
     {
-        int RowIndex { get; set; }
-        int ColIndex { get; set; }
+        int RowIndex { get; }
+        int ColIndex { get; }
+        bool IsOddRow { get; }
+        Vector3 WorldPosition { get; }
+        public float HeightHalf { get; }
+        
+        public float WidthHalf { get; }
     }
 }
