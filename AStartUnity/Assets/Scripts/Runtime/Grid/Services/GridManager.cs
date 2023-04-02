@@ -47,6 +47,7 @@ namespace Runtime.Grid.Services
             }
         }
 
+        // TODO: this is only temporary for debug purposes
         private void Update()
         {
             var ray = _gridRaycaster.GetRayFromMousePosition();
@@ -59,6 +60,7 @@ namespace Runtime.Grid.Services
             }
             var selectedCell =
                 GridCellCoordsHelpers.GetCellByWorldPoint(new Vector2(hitPoint.x, hitPoint.z), Presenters);
+            Debug.Log(selectedCell);
         }
     }
 }
