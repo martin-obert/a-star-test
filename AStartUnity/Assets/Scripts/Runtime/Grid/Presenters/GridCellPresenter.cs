@@ -1,11 +1,35 @@
-﻿using Runtime.Grid.Data;
+﻿using System;
+using Runtime.Grid.Data;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Runtime.Grid.Presenters
 {
-    public sealed class GridCellPresenter : MonoBehaviour, IGridCellSelectable
+    [RequireComponent(typeof(Renderer))]
+    public sealed class GridCellPresenter : MonoBehaviour, IGridCellSelectable, IGridCellHoverable
     {
+        [SerializeField] private Color hoverColor = Color.yellow;
+        
         private IGridCell _cell;
+        // TODO: this should be false for non-walkable terrain
+        public bool CanHover => true;
+        private MaterialPropertyBlock _hoverState;
+        private MaterialPropertyBlock _normalState;
+        private static readonly int BaseColorProp = Shader.PropertyToID("_Color");
+        private Renderer _renderer;
+
+        private void Awake()
+        {
+            _renderer = GetComponent<Renderer>();
+            
+            Assert.IsNotNull(_renderer, "_renderer != null");
+            
+            _hoverState = new MaterialPropertyBlock();
+            _normalState = new MaterialPropertyBlock();
+            
+            _hoverState.SetColor(BaseColorProp, hoverColor);
+            _normalState.SetColor(BaseColorProp, _renderer.material.GetColor(BaseColorProp));
+        }
 
         public void SetDataModel(IGridCell cell)
         {
@@ -14,8 +38,6 @@ namespace Runtime.Grid.Presenters
             transform.position = cell.WorldPosition;
 
         }
-
-        private Bounds _bounds;
 
         public bool IsBoxCastHit(Vector2 cursor)
         {
@@ -43,6 +65,16 @@ namespace Runtime.Grid.Presenters
             double dy = y - cy;
             double value = (dx * dx) / (a * a) + (dy * dy) / (b * b);
             return value <= 1;
+        }
+     
+        public void OnCursorEnter()
+        {
+            _renderer.SetPropertyBlock(_hoverState);
+        }
+
+        public void OnCursorExit()
+        {
+            _renderer.SetPropertyBlock(_normalState);
         }
     }
 }

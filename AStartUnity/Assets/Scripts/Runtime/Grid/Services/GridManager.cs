@@ -15,6 +15,7 @@ namespace Runtime.Grid.Services
         private Transform debugPoint;
         private readonly IGridRaycaster _gridRaycaster = new GridRaycaster();
         public IGridCell[] CurrentCells { get; private set; }
+        public IGridCellHoverable _lastHovered;
         public List<GridCellPresenter> Presenters { get; } = new();
 
         [SerializeField] private int rowCount = 1;
@@ -58,9 +59,22 @@ namespace Runtime.Grid.Services
             {
                 debugPoint.position = hitPoint;
             }
-            var selectedCell =
+            
+            var hoveredCell =
                 GridCellCoordsHelpers.GetCellByWorldPoint(new Vector2(hitPoint.x, hitPoint.z), Presenters);
-            Debug.Log(selectedCell);
+
+            if (hoveredCell is IGridCellHoverable hoverable)
+            {
+                if (hoverable == _lastHovered) return;
+                _lastHovered?.OnCursorExit();
+                _lastHovered = hoverable;
+                _lastHovered?.OnCursorEnter();
+            }
+            else 
+            {
+                _lastHovered?.OnCursorExit();
+                _lastHovered = null;
+            }
         }
     }
 }
