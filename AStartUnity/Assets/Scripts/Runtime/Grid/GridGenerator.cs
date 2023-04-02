@@ -40,16 +40,21 @@ namespace Grid
 
         public static IGridCell[] CollectNeighbours(IGridCell currentCell, IGridCell[] grid)
         {
+            var shift = currentCell.IsOddRow ? 0 : -1;
             var result = new[]
             {
                 GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex, currentCell.ColIndex + 1),
                 GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex, currentCell.ColIndex - 1),
-                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex - 1, currentCell.ColIndex),
-                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex - 1, currentCell.ColIndex + 1),
-                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex + 1, currentCell.ColIndex),
-                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex + 1, currentCell.ColIndex + 1),
+                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex - 1,
+                    currentCell.ColIndex + shift),
+                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex - 1,
+                    currentCell.ColIndex + shift + 1),
+                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex + 1,
+                    currentCell.ColIndex + shift),
+                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex + 1,
+                    currentCell.ColIndex + shift + 1),
             };
-            return result.Where(x => x != null).ToArray();
+            return result.Where(x => x != null).Distinct().ToArray();
         }
     }
 }

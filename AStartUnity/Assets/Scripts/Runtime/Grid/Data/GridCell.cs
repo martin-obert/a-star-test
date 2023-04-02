@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using PathFinding;
 using Runtime.Grid.Presenters;
@@ -40,23 +41,25 @@ namespace Runtime.Grid.Data
         public bool IsHighlighted
         {
             get => _isHighlighted;
-            set
+            private set
             {
                 if (value == _isHighlighted) return;
                 _isHighlighted = value;
+               
                 OnPropertyChanged();
             }
         }
 
-        public void ToggleHighlighted(bool? value = null)
+        public void ToggleHighlighted(bool? value = null, bool includeNeighbours = false)
         {
-            if (value.HasValue)
-            {
-                IsHighlighted = value.Value;
-                return;
-            }
+            value ??= !IsHighlighted;
+            IsHighlighted = value.Value;
+            if (!includeNeighbours) return;
             
-            IsHighlighted = !IsHighlighted;
+            foreach (var neighbour in Neighbours.OfType<IGridCell>())
+            {
+                neighbour.ToggleHighlighted(value);
+            }
         }
 
         /// <summary>
@@ -86,7 +89,6 @@ namespace Runtime.Grid.Data
         {
             throw new System.NotImplementedException();
         }
-
 
         public float EstimatedCostTo(IAStarNode target)
         {

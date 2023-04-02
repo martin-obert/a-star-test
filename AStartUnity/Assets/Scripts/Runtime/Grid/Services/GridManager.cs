@@ -73,14 +73,14 @@ namespace Runtime.Grid.Services
                 else
                 {
                     if (hoveredCell == _lastHovered) return;
-                    _lastHovered?.ToggleHighlighted(false);
+                    _lastHovered?.ToggleHighlighted(false, true);
                     _lastHovered = hoveredCell;
-                    _lastHovered?.ToggleHighlighted(true);
+                    _lastHovered?.ToggleHighlighted(true, true);
                 }
             }
             else
             {
-                _lastHovered?.ToggleHighlighted(false);
+                _lastHovered?.ToggleHighlighted(false, true);
                 _lastHovered = null;
             }
         }
