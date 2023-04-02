@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.ComponentModel;
 using Runtime.Grid.Data;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -6,7 +6,7 @@ using UnityEngine.Assertions;
 namespace Runtime.Grid.Presenters
 {
     [RequireComponent(typeof(Renderer))]
-    public sealed class GridCellPresenter : MonoBehaviour, IGridCellSelectable, IGridCellHoverable
+    public sealed class GridCellPresenter : MonoBehaviour
     {
         [SerializeField] private Color hoverColor = Color.yellow;
         [SerializeField] private Color selectionColor = Color.green;
@@ -36,59 +36,61 @@ namespace Runtime.Grid.Presenters
             _normalState.SetColor(BaseColorProp, _renderer.material.GetColor(BaseColorProp));
         }
 
+        private void OnDestroy()
+        {
+            if (_cell == null) return;
+            _cell.PropertyChanged -= CellOnPropertyChanged;
+        }
+
         public void SetDataModel(IGridCell cell)
         {
             _cell = cell;
+            Bind(cell);
+        }
+
+        private void Bind(IGridCell cell)
+        {
+            cell.PropertyChanged += CellOnPropertyChanged;
             name = $"row: {cell.RowIndex}, col: {cell.ColIndex}";
             transform.position = cell.WorldPosition;
         }
 
-        public bool IsBoxCastHit(Vector2 cursor)
+        private void CellOnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var position = transform.position;
-            var v = cursor.y <= position.z + _cell.HeightHalf &&
-                    cursor.y >= position.z - _cell.HeightHalf;
+            var cell = (IGridCell)sender;
 
-            var h = cursor.x <= position.x + _cell.WidthHalf &&
-                    cursor.x >= position.x - _cell.WidthHalf;
-
-            return v && h;
+            switch (e.PropertyName)
+            {
+                case nameof(IGridCell.IsHighlighted):
+                {
+                    UpdateHoverState(cell);
+                    return;
+                }
+                case nameof(IGridCell.IsSelected):
+                {
+                    UpdateSelectionState(cell);
+                    return;
+                }
+            }
         }
 
-        public bool IsCircleCastHit(Vector2 cursor)
+        private void UpdateSelectionState(IGridCell cell)
         {
-            var position = transform.position;
-
-            return IsPointInsideEllipse(cursor.x, cursor.y, position.x, position.z, _cell.WidthHalf,
-                _cell.HeightHalf);
+            if (cell.IsSelected)
+            {
+                _renderer.SetPropertyBlock(_selectedState);
+            }
+            else
+            {
+                UpdateHoverState(cell);
+            }
         }
 
-        private static bool IsPointInsideEllipse(double x, double y, double cx, double cy, double a, double b)
+        private void UpdateHoverState(IGridCell cell)
         {
-            double dx = x - cx;
-            double dy = y - cy;
-            double value = (dx * dx) / (a * a) + (dy * dy) / (b * b);
-            return value <= 1;
+            if (cell.IsSelected) return;
+            _renderer.SetPropertyBlock(cell.IsHighlighted ? _hoverState : _normalState);
         }
 
-        public void OnCursorEnter()
-        {
-            if(IsSelected) return;
-            _renderer.SetPropertyBlock(_hoverState);
-        }
-
-        public void OnCursorExit()
-        {
-            if(IsSelected) return;
-            _renderer.SetPropertyBlock(_normalState);
-        }
-
-        public bool IsSelected { get; private set; }
-
-        public void ToggleSelection(bool? value = null)
-        {
-            IsSelected = !IsSelected;
-            _renderer.SetPropertyBlock(IsSelected ? _selectedState : _normalState);
-        }
     }
 }
