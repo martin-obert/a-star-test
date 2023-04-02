@@ -12,11 +12,10 @@ namespace Runtime.Grid.Services
 {
     public sealed class GridManager : MonoBehaviour, IGridManager
     {
-        [SerializeField]
-        private Transform debugPoint;
+        [SerializeField] private Transform debugPoint;
         private readonly IGridRaycaster _gridRaycaster = new GridRaycaster();
         public IGridCell[] CurrentCells { get; private set; }
-        public IGridCellHoverable _lastHovered;
+        public IGridCell _lastHovered;
         public List<GridCellPresenter> Presenters { get; } = new();
 
         [SerializeField] private int rowCount = 1;
@@ -53,35 +52,35 @@ namespace Runtime.Grid.Services
         private void Update()
         {
             var ray = _gridRaycaster.GetRayFromMousePosition();
-            
+
             if (!_gridRaycaster.TryGetHitOnGrid(ray, out var hitPoint)) return;
-            
+
             if (debugPoint)
             {
                 debugPoint.position = hitPoint;
             }
-            
-            var hoveredCell =
-                GridCellCoordsHelpers.GetCellByWorldPoint(new Vector2(hitPoint.x, hitPoint.z), Presenters);
 
-            if (hoveredCell is IGridCellHoverable hoverable)
+            var hoveredCell =
+                GridCellHelpers.GetCellByWorldPoint(new Vector2(hitPoint.x, hitPoint.z), CurrentCells);
+
+            if (hoveredCell != null)
             {
-                if (Input.GetMouseButtonDown((int)MouseButton.LeftMouse) && hoverable is IGridCellSelectable selectable)
+                if (Input.GetMouseButtonDown((int)MouseButton.LeftMouse))
                 {
-                    selectable.ToggleSelection();
+                    hoveredCell.ToggleSelected();
                     _lastHovered = null;
                 }
                 else
                 {
-                    if (hoverable == _lastHovered) return;
-                    _lastHovered?.OnCursorExit();
-                    _lastHovered = hoverable;
-                    _lastHovered?.OnCursorEnter();    
+                    if (hoveredCell == _lastHovered) return;
+                    _lastHovered?.ToggleHighlighted(false, true);
+                    _lastHovered = hoveredCell;
+                    _lastHovered?.ToggleHighlighted(true, true);
                 }
             }
-            else 
+            else
             {
-                _lastHovered?.OnCursorExit();
+                _lastHovered?.ToggleHighlighted(false, true);
                 _lastHovered = null;
             }
         }

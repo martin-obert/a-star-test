@@ -4,7 +4,8 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Obert.AStar"
+        "Obert.AStar",
+        "SF.Pathfinding"
     ],
     "includePlatforms": [
         "Editor"
