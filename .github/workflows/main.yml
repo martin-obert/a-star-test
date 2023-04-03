@@ -45,7 +45,11 @@ jobs:
           allowDirtyBuild: true
 
       # Output
-      - uses: actions/upload-artifact@v2
+      - name: Zip build
+        run: |
+          zip -r WinX64_build.zip build
+      
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: Build
-          path: build
+          files: WinX64_build.zip
