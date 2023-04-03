@@ -1,7 +1,9 @@
 name: Create Win x64 build 😎
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
 
 jobs:
   build:
