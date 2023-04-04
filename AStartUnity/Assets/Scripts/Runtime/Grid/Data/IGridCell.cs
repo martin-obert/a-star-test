@@ -1,5 +1,7 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using PathFinding;
+using Runtime.Terrains;
 using UnityEngine;
 
 namespace Runtime.Grid.Data
@@ -18,6 +20,7 @@ namespace Runtime.Grid.Data
         Vector3 WorldPosition { get; }
         public float HeightHalf { get; }
         public float WidthHalf { get; }
-        void SetNeighbours(IGridCell[] neighbours);
+        void SetNeighbours(IEnumerable<IGridCell> neighbours);
+        ITerrainVariant TerrainVariant { get; }
     }
 }

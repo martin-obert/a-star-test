@@ -18,6 +18,7 @@ namespace Runtime.Grid.Presenters
         private MaterialPropertyBlock _normalState;
         private static readonly int BaseColorProp = Shader.PropertyToID("_Color");
         private Renderer _renderer;
+        private static readonly int MainTex = Shader.PropertyToID("_MainTex");
 
         private void Awake()
         {
@@ -51,6 +52,10 @@ namespace Runtime.Grid.Presenters
             cell.PropertyChanged += CellOnPropertyChanged;
             name = $"row: {cell.RowIndex}, col: {cell.ColIndex}";
             transform.position = cell.WorldPosition;
+            _normalState.SetTexture(MainTex, cell.TerrainVariant.ColorTexture);
+            _hoverState.SetTexture(MainTex, cell.TerrainVariant.ColorTexture);
+            _selectedState.SetTexture(MainTex, cell.TerrainVariant.ColorTexture);
+            _renderer.SetPropertyBlock(_normalState);
         }
 
         private void CellOnPropertyChanged(object sender, PropertyChangedEventArgs e)

@@ -531,6 +531,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cf1815366bc43edb7c7c3900878fe76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  terrainVariantRepository: {fileID: 11400000, guid: 660e52ddaa326a84a80853e8bfe68a82,
+    type: 2}
   debugPoint: {fileID: 825463615}
   rowCount: 10
   colCount: 10
