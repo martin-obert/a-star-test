@@ -1,12 +1,13 @@
 ﻿using System.Linq;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
+using Runtime.Terrains;
 
 namespace Runtime.Grid
 {
     public static class GridGenerator
     {
-        public static IGridCell[] GenerateGrid(int rowCount, int colCount)
+        public static IGridCell[] GenerateGrid(int rowCount, int colCount, ITerrainVariantRepository repository)
         {
             // TODO: check args for negative values
 
@@ -22,7 +23,8 @@ namespace Runtime.Grid
                         ColIndex = col,
                         WorldPosition = GridCellHelpers.ToWorldCoords(row, col),
                         HeightHalf = GridDefinitions.HeightRadius,
-                        WidthHalf = GridDefinitions.WidthRadius
+                        WidthHalf = GridDefinitions.WidthRadius,
+                        TerrainVariant = repository.GetRandomTerrainVariant(row, col)
                     };
                 }
             }

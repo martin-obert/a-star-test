@@ -4,6 +4,7 @@ using System.Linq;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
 using Runtime.Inputs;
+using Runtime.Terrains;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -12,7 +13,7 @@ namespace Runtime.Grid.Services
     public sealed class GridManager : MonoBehaviour, IGridManager
     {
         public static IGridManager Instance { get; private set; }
-
+        [SerializeField] private TerrainVariantRepository terrainVariantRepository;
         [SerializeField] private Transform debugPoint;
         private readonly IGridRaycaster _gridRaycaster = new GridRaycaster();
         public IGridCell[] CurrentCells { get; private set; }
@@ -51,7 +52,7 @@ namespace Runtime.Grid.Services
 
         public void GenerateGrid()
         {
-            CurrentCells = GridGenerator.GenerateGrid(rowCount, colCount);
+            CurrentCells = GridGenerator.GenerateGrid(rowCount, colCount, terrainVariantRepository);
 
             foreach (var gridCell in CurrentCells)
             {

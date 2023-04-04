@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using PathFinding;
 using Runtime.Grid.Presenters;
+using Runtime.Terrains;
 using UnityEngine;
 
 namespace Runtime.Grid.Data
@@ -65,7 +66,7 @@ namespace Runtime.Grid.Data
             value ??= !IsPinned;
             IsPinned = value.Value;
         }
-        
+
         public void ToggleSelected(bool? value = null)
         {
             value ??= !IsSelected;
@@ -87,12 +88,13 @@ namespace Runtime.Grid.Data
         public float HeightHalf { get; set; }
         public float WidthHalf { get; set; }
 
-        public void SetNeighbours(IGridCell[] neighbours)
+        public void SetNeighbours(IEnumerable<IGridCell> neighbours)
         {
             Neighbours = neighbours;
         }
 
         public IEnumerable<IAStarNode> Neighbours { get; private set; }
+        public ITerrainVariant TerrainVariant { get; set; }
 
 
         public float CostTo(IAStarNode neighbour)
@@ -103,7 +105,7 @@ namespace Runtime.Grid.Data
                 throw new Exception($"Not a neighbour of cell (r: {RowIndex} - c: {ColIndex})");
 
             // TODO: until we introduce terrains this will be constant
-            return 1;
+            return TerrainVariant.DaysTravelCost;
         }
 
         public float EstimatedCostTo(IAStarNode target)
