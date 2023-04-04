@@ -13,8 +13,6 @@ namespace Runtime.Grid.Presenters
 
         private IGridCell _cell;
 
-        // TODO: this should be false for non-walkable terrain
-        public bool CanHover => true;
         private MaterialPropertyBlock _selectedState;
         private MaterialPropertyBlock _hoverState;
         private MaterialPropertyBlock _normalState;
@@ -71,6 +69,24 @@ namespace Runtime.Grid.Presenters
                     UpdateSelectionState(cell);
                     return;
                 }
+                case nameof(IGridCell.IsPinned):
+                {
+                    UpdatePinState(cell);
+                    return;
+                }
+            }
+        }
+
+        private void UpdatePinState(IGridCell cell)
+        {
+            if(cell.IsSelected) return;
+            if (cell.IsPinned)
+            {
+                _renderer.SetPropertyBlock(_hoverState);
+            }
+            else
+            {
+                UpdateHoverState(cell);
             }
         }
 
@@ -88,7 +104,7 @@ namespace Runtime.Grid.Presenters
 
         private void UpdateHoverState(IGridCell cell)
         {
-            if (cell.IsSelected) return;
+            if (cell.IsSelected || cell.IsPinned) return;
             _renderer.SetPropertyBlock(cell.IsHighlighted ? _hoverState : _normalState);
         }
 

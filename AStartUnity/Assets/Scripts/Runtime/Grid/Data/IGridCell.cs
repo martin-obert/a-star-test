@@ -7,9 +7,11 @@ namespace Runtime.Grid.Data
     public interface IGridCell : IAStarNode, INotifyPropertyChanged
     {
         bool IsSelected { get; }
+        bool IsPinned { get; }
         void ToggleSelected(bool? value = null);
         bool IsHighlighted { get; }
-        void ToggleHighlighted(bool? value = null, bool includeNeighbours = false);
+        void ToggleHighlighted(bool? value = null);
+        void TogglePinned(bool? value = null);
         int RowIndex { get; }
         int ColIndex { get; }
         bool IsOddRow { get; }

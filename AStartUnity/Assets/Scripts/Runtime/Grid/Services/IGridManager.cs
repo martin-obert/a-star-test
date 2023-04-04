@@ -4,8 +4,6 @@ namespace Runtime.Grid.Services
 {
     public interface IGridManager
     {
-        IGridCell[] CurrentCells { get; }
-
-        void GenerateGrid();
+        IGridCell HoverCell { get; }
     }
 }

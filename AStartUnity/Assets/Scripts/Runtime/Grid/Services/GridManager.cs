@@ -4,19 +4,20 @@ using System.Linq;
 using Grid;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
+using Runtime.Inputs;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.UIElements;
 
 namespace Runtime.Grid.Services
 {
     public sealed class GridManager : MonoBehaviour, IGridManager
     {
+        public static IGridManager Instance { get; private set; }
+
         [SerializeField] private Transform debugPoint;
         private readonly IGridRaycaster _gridRaycaster = new GridRaycaster();
         public IGridCell[] CurrentCells { get; private set; }
-        public IGridCell _lastHovered;
-        public List<GridCellPresenter> Presenters { get; } = new();
+        public IGridCell HoverCell { get; private set; }
 
         [SerializeField] private int rowCount = 1;
         [SerializeField] private int colCount = 1;
@@ -25,10 +26,18 @@ namespace Runtime.Grid.Services
 
         private void Awake()
         {
+            if (Instance != null && !ReferenceEquals(Instance, this))
+            {
+                Destroy(this);
+                return;
+            }
+
             Assert.IsNotNull(spawner, "spawner != null");
             Assert.IsTrue(rowCount > 0, "rowCount > 0");
             Assert.IsTrue(colCount > 0, "colCount > 0");
+            Instance = this;
         }
+
 
         private void Start()
         {
@@ -37,21 +46,20 @@ namespace Runtime.Grid.Services
                 GenerateGrid();
             }
         }
-
+        
         public void GenerateGrid()
         {
             CurrentCells = GridGenerator.GenerateGrid(rowCount, colCount);
 
             foreach (var gridCell in CurrentCells)
             {
-                Presenters.Add(spawner.SpawnOne(gridCell, transform));
+                spawner.SpawnOne(gridCell, transform);
             }
         }
 
-        // TODO: this is only temporary for debug purposes
         private void Update()
         {
-            var ray = _gridRaycaster.GetRayFromMousePosition();
+            var ray = _gridRaycaster.GetRayFromMousePosition(UserInputManager.Instance.MousePosition);
 
             if (!_gridRaycaster.TryGetHitOnGrid(ray, out var hitPoint)) return;
 
@@ -65,23 +73,15 @@ namespace Runtime.Grid.Services
 
             if (hoveredCell != null)
             {
-                if (Input.GetMouseButtonDown((int)MouseButton.LeftMouse))
-                {
-                    hoveredCell.ToggleSelected();
-                    _lastHovered = null;
-                }
-                else
-                {
-                    if (hoveredCell == _lastHovered) return;
-                    _lastHovered?.ToggleHighlighted(false, true);
-                    _lastHovered = hoveredCell;
-                    _lastHovered?.ToggleHighlighted(true, true);
-                }
+                if (hoveredCell == HoverCell) return;
+                HoverCell?.ToggleHighlighted(false);
+                HoverCell = hoveredCell;
+                HoverCell?.ToggleHighlighted(true);
             }
             else
             {
-                _lastHovered?.ToggleHighlighted(false, true);
-                _lastHovered = null;
+                HoverCell?.ToggleHighlighted(false);
+                HoverCell = null;
             }
         }
     }

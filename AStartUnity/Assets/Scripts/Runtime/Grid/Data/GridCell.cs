@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -15,27 +16,28 @@ namespace Runtime.Grid.Data
     {
         private bool _isSelected;
         private bool _isHighlighted;
+        private bool _isPinned;
+
+        public bool IsPinned
+        {
+            get => _isPinned;
+            private set
+            {
+                if (value == _isPinned) return;
+                _isPinned = value;
+                OnPropertyChanged();
+            }
+        }
 
         public bool IsSelected
         {
             get => _isSelected;
-            set
+            private set
             {
                 if (value == _isSelected) return;
                 _isSelected = value;
                 OnPropertyChanged();
             }
-        }
-
-        public void ToggleSelected(bool? value = null)
-        {
-            if (value.HasValue)
-            {
-                IsSelected = value.Value;
-                return;
-            }
-
-            IsSelected = !IsSelected;
         }
 
         public bool IsHighlighted
@@ -45,21 +47,29 @@ namespace Runtime.Grid.Data
             {
                 if (value == _isHighlighted) return;
                 _isHighlighted = value;
-               
+
                 OnPropertyChanged();
             }
         }
 
-        public void ToggleHighlighted(bool? value = null, bool includeNeighbours = false)
+
+        public void ToggleHighlighted(bool? value = null)
         {
             value ??= !IsHighlighted;
+
             IsHighlighted = value.Value;
-            if (!includeNeighbours) return;
-            
-            foreach (var neighbour in Neighbours.OfType<IGridCell>())
-            {
-                neighbour.ToggleHighlighted(value);
-            }
+        }
+
+        public void TogglePinned(bool? value = null)
+        {
+            value ??= !IsPinned;
+            IsPinned = value.Value;
+        }
+        
+        public void ToggleSelected(bool? value = null)
+        {
+            value ??= !IsSelected;
+            IsSelected = value.Value;
         }
 
         /// <summary>
@@ -87,12 +97,23 @@ namespace Runtime.Grid.Data
 
         public float CostTo(IAStarNode neighbour)
         {
-            throw new System.NotImplementedException();
+            if (neighbour == null)
+                throw new ArgumentNullException(nameof(neighbour));
+            if (!Neighbours.Contains(neighbour))
+                throw new Exception($"Not a neighbour of cell (r: {RowIndex} - c: {ColIndex})");
+
+            // TODO: until we introduce terrains this will be constant
+            return 1;
         }
 
         public float EstimatedCostTo(IAStarNode target)
         {
-            throw new System.NotImplementedException();
+            if (target is not IGridCell gridCell) throw new Exception("Must be a grid cell for pathfinding est.");
+
+            var v = Math.Abs(gridCell.ColIndex - ColIndex);
+            var h = Math.Abs(gridCell.RowIndex - RowIndex);
+
+            return v + h;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
