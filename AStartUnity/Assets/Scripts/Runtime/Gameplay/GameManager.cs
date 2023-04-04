@@ -19,7 +19,7 @@ namespace Runtime.Gameplay
         private void InstanceOnSelectCell(object sender, EventArgs e)
         {
             var gridCell = GridManager.Instance.HoverCell;
-            if (gridCell == null) return;
+            if (gridCell == null || !gridCell.TerrainVariant.IsWalkable) return;
             
             gridCell.ToggleSelected();
             
