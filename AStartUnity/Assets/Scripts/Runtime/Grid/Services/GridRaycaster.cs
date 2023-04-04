@@ -1,5 +1,4 @@
 ﻿using System;
-using Runtime.Grid.Data;
 using UnityEngine;
 
 namespace Runtime.Grid.Services
@@ -8,8 +7,7 @@ namespace Runtime.Grid.Services
     {
         private Camera _mainCamera;
 
-
-        public Ray GetRayFromMousePosition()
+        public Ray GetRayFromMousePosition(Vector2 mousePosition)
         {
             if (!_mainCamera)
             {
@@ -23,7 +21,7 @@ namespace Runtime.Grid.Services
 
             var cameraPosition = _mainCamera.transform.position;
 
-            var cursor = _mainCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y,
+            var cursor = _mainCamera.ScreenToWorldPoint(new Vector3(mousePosition.x, mousePosition.y,
                 _mainCamera.nearClipPlane));
             var direction = cursor - cameraPosition;
             return new Ray(cameraPosition, direction);
