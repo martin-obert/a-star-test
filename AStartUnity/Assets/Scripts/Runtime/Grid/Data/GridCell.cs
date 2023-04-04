@@ -110,10 +110,7 @@ namespace Runtime.Grid.Data
         {
             if (target is not IGridCell gridCell) throw new Exception("Must be a grid cell for pathfinding est.");
 
-            var v = Math.Abs(gridCell.ColIndex - ColIndex);
-            var h = Math.Abs(gridCell.RowIndex - RowIndex);
-
-            return v + h;
+            return Math.Abs((gridCell.WorldPosition - WorldPosition).magnitude);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

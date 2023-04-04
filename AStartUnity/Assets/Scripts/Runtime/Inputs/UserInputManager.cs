@@ -11,6 +11,8 @@ namespace Runtime.Inputs
 
         public event EventHandler SelectCell;
         public Vector2 MousePosition => Input.mousePosition;
+        public Vector3 AxisMovement => new(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+
 
         private void Awake()
         {
