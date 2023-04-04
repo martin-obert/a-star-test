@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Grid;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
 using Runtime.Inputs;
@@ -18,6 +17,9 @@ namespace Runtime.Grid.Services
         private readonly IGridRaycaster _gridRaycaster = new GridRaycaster();
         public IGridCell[] CurrentCells { get; private set; }
         public IGridCell HoverCell { get; private set; }
+        public bool IsPointOnGrid(Vector2 point) => _rect.Contains(point);
+
+        private Rect _rect;
 
         [SerializeField] private int rowCount = 1;
         [SerializeField] private int colCount = 1;
@@ -46,7 +48,7 @@ namespace Runtime.Grid.Services
                 GenerateGrid();
             }
         }
-        
+
         public void GenerateGrid()
         {
             CurrentCells = GridGenerator.GenerateGrid(rowCount, colCount);
@@ -55,6 +57,11 @@ namespace Runtime.Grid.Services
             {
                 spawner.SpawnOne(gridCell, transform);
             }
+
+            var minCell = GridCellHelpers.GetCellByCoords(CurrentCells, 0, 0);
+            var maxCell = GridCellHelpers.GetCellByCoords(CurrentCells, rowCount - 1, colCount - 1);
+            _rect = Rect.MinMaxRect(minCell.WorldPosition.x, minCell.WorldPosition.z, maxCell.WorldPosition.x,
+                maxCell.WorldPosition.z);
         }
 
         private void Update()

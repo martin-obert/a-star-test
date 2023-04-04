@@ -1,10 +1,8 @@
 ﻿using System.Linq;
-using Runtime.Grid;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
-using UnityEngine;
 
-namespace Grid
+namespace Runtime.Grid
 {
     public static class GridGenerator
     {
