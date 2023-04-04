@@ -7,5 +7,7 @@ namespace Runtime.Terrains
         Texture2D ColorTexture { get; }
 
         int DaysTravelCost { get; }
+        
+        bool IsWalkable { get; }
     }
 }

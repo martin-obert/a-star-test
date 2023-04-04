@@ -105,13 +105,15 @@ namespace Runtime.Grid.Data
                 throw new Exception($"Not a neighbour of cell (r: {RowIndex} - c: {ColIndex})");
 
             // TODO: until we introduce terrains this will be constant
-            return TerrainVariant.DaysTravelCost;
+            return TerrainVariant.IsWalkable ? TerrainVariant.DaysTravelCost : float.MaxValue;
         }
 
         public float EstimatedCostTo(IAStarNode target)
         {
             if (target is not IGridCell gridCell) throw new Exception("Must be a grid cell for pathfinding est.");
-
+            if (!gridCell.TerrainVariant.IsWalkable)
+                return float.MaxValue;
+            
             return Math.Abs((gridCell.WorldPosition - WorldPosition).magnitude);
         }
 

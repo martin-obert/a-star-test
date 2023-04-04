@@ -12,6 +12,7 @@ namespace Tests
         {
             public Texture2D ColorTexture { get; }
             public int DaysTravelCost => 1;
+            public bool IsWalkable { get; }
         }
         
         private sealed class TerrainVariantRepositoryMock : ITerrainVariantRepository
