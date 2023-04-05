@@ -1,0 +1,85 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: bb8902bc376d33b41ac6f53f2c9b05eb
+  m_SerializeEntries:
+  - m_GUID: c50de60d7dc10114d91ee2b33df0b2fa
+    m_Address: Assets/Art/Prefabs/Hexagon Variants/Desert Grid Cell Variant.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
+    - grid_cell_variant
+  - m_GUID: 3ffb3eb745779574eb71220ed3c9b72b
+    m_Address: Assets/Art/Prefabs/Hexagon Variants/Water Grid Cell Variant.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
+    - grid_cell_variant
+  - m_GUID: e5c023690957eaf4196eb41789c49fd7
+    m_Address: Assets/Art/Prefabs/Hexagon Variants/Grass Grid Cell Variant.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
+    - grid_cell_variant
+  - m_GUID: 4a000f9c6ea68d8459f7340a71b6f2ad
+    m_Address: Assets/Art/Prefabs/Hexagon Variants/Forest Grid Cell Variant.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
+    - grid_cell_variant
+  - m_GUID: de753c78bf663aa40b106a5ffd4e26b6
+    m_Address: Assets/Art/Prefabs/Hexagon Variants/Mountain Grid Cell Variant.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
+    - grid_cell_variant
+  - m_GUID: 29136d98fc724aa4d9666c00e2aeab07
+    m_Address: Assets/Art/Prefabs/Hexagon_Model.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
+  - m_GUID: dea42c1ce0c5947b1826926d46ac10b3
+    m_Address: Assets/Art/Textures/grass.png
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
+  - m_GUID: 8e61c22d044b8444c8c267c9785f2268
+    m_Address: Assets/Art/Textures/forest.png
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
+  - m_GUID: 8caa4b015662a42309854b1c49d6391d
+    m_Address: Assets/Art/Textures/desert.png
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
+  - m_GUID: 0d878bd9be6f941c0a1490b66b6f260d
+    m_Address: Assets/Art/Textures/mountain.png
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
+  - m_GUID: 97e01983c7b6f435e9c8cf5bec65aa49
+    m_Address: Assets/Art/Textures/water.png
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: dbed9c6d90e0d7842beefa1e1c08d92a, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 253c90538a24c41429f9b3830230258b, type: 2}
+    - {fileID: 11400000, guid: 6049f55ce7fc6f345a09e33a770d05c0, type: 2}

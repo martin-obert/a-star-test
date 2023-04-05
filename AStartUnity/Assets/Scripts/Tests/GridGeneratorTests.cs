@@ -10,14 +10,14 @@ namespace Tests
     {
         private sealed class TerrainVariantMock : ITerrainVariant
         {
-            public Texture2D ColorTexture { get; }
+            public Texture2D MainTex { get; }
             public int DaysTravelCost => 1;
             public bool IsWalkable { get; }
         }
         
         private sealed class TerrainVariantRepositoryMock : ITerrainVariantRepository
         {
-            public ITerrainVariant GetRandomTerrainVariant(int row, int col)
+            public ITerrainVariant GetRandomTerrainVariant()
             {
                 return new TerrainVariantMock();
             }

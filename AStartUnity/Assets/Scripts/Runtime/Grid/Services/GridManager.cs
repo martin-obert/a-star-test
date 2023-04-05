@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using Runtime.Gameplay;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
 using Runtime.Inputs;
-using Runtime.Terrains;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -12,20 +10,20 @@ namespace Runtime.Grid.Services
 {
     public sealed class GridManager : MonoBehaviour, IGridManager
     {
-        public static IGridManager Instance { get; private set; }
-        [SerializeField] private TerrainVariantRepository terrainVariantRepository;
-        [SerializeField] private Transform debugPoint;
+        private readonly PathfindingContext _pathfindingContext = new();
         private readonly IGridRaycaster _gridRaycaster = new GridRaycaster();
+        
+        private Rect _rect;
+        
         public IGridCell[] CurrentCells { get; private set; }
         public IGridCell HoverCell { get; private set; }
-        public bool IsPointOnGrid(Vector2 point) => _rect.Contains(point);
+        public static IGridManager Instance { get; private set; }
 
-        private Rect _rect;
 
         [SerializeField] private int rowCount = 1;
         [SerializeField] private int colCount = 1;
         [SerializeField] private bool autoGenerateGridOnStart;
-        [SerializeField] private GridCellPresenterSpawner spawner;
+        [SerializeField] private GridCellRepository gridCellRepository;
 
         private void Awake()
         {
@@ -35,12 +33,11 @@ namespace Runtime.Grid.Services
                 return;
             }
 
-            Assert.IsNotNull(spawner, "spawner != null");
+            Assert.IsNotNull(gridCellRepository, "gridCellRepository != null");
             Assert.IsTrue(rowCount > 0, "rowCount > 0");
             Assert.IsTrue(colCount > 0, "colCount > 0");
             Instance = this;
         }
-
 
         private void Start()
         {
@@ -48,33 +45,39 @@ namespace Runtime.Grid.Services
             {
                 GenerateGrid();
             }
+
+            UserInputManager.Instance.SelectCell += InstanceOnSelectCell;
         }
 
-        public void GenerateGrid()
+        private void InstanceOnSelectCell(object sender, EventArgs e)
         {
-            CurrentCells = GridGenerator.GenerateGrid(rowCount, colCount, terrainVariantRepository);
+            var gridCell = HoverCell;
 
-            foreach (var gridCell in CurrentCells)
+            if (gridCell == null || !gridCell.TerrainVariant.IsWalkable) return;
+
+            gridCell.ToggleSelected();
+
+            if (gridCell.IsSelected)
             {
-                spawner.SpawnOne(gridCell, transform);
+                _pathfindingContext.AddWaypoint(gridCell);
             }
-
-            var minCell = GridCellHelpers.GetCellByCoords(CurrentCells, 0, 0);
-            var maxCell = GridCellHelpers.GetCellByCoords(CurrentCells, rowCount - 1, colCount - 1);
-            _rect = Rect.MinMaxRect(minCell.WorldPosition.x, minCell.WorldPosition.z, maxCell.WorldPosition.x,
-                maxCell.WorldPosition.z);
+            else
+            {
+                _pathfindingContext.RemoveWaypoint(gridCell);
+            }
         }
+
+        private void OnDestroy()
+        {
+            UserInputManager.Instance.SelectCell -= InstanceOnSelectCell;
+        }
+
 
         private void Update()
         {
             var ray = _gridRaycaster.GetRayFromMousePosition(UserInputManager.Instance.MousePosition);
 
             if (!_gridRaycaster.TryGetHitOnGrid(ray, out var hitPoint)) return;
-
-            if (debugPoint)
-            {
-                debugPoint.position = hitPoint;
-            }
 
             var hoveredCell =
                 GridCellHelpers.GetCellByWorldPoint(new Vector2(hitPoint.x, hitPoint.z), CurrentCells);
@@ -92,5 +95,23 @@ namespace Runtime.Grid.Services
                 HoverCell = null;
             }
         }
+        
+        
+        public void GenerateGrid()
+        {
+            CurrentCells = GridGenerator.GenerateGrid(rowCount, colCount, gridCellRepository);
+
+            foreach (var gridCell in CurrentCells)
+            {
+                gridCellRepository.GetPrefab(gridCell.TerrainVariant, transform).SetDataModel(gridCell);
+            }
+
+            var minCell = GridCellHelpers.GetCellByCoords(CurrentCells, 0, 0);
+            var maxCell = GridCellHelpers.GetCellByCoords(CurrentCells, rowCount - 1, colCount - 1);
+            _rect = Rect.MinMaxRect(minCell.WorldPosition.x, minCell.WorldPosition.z, maxCell.WorldPosition.x,
+                maxCell.WorldPosition.z);
+        }
+        
+        public bool IsPointOnGrid(Vector2 point) => _rect.Contains(point);
     }
 }

@@ -1,41 +1,102 @@
 ﻿using System;
-using System.ComponentModel;
-using Runtime.Grid.Services;
-using Runtime.Inputs;
+using System.Collections;
+using Runtime.Definitions;
+using Runtime.Messaging;
+using Runtime.Messaging.Events;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.SceneManagement;
 
 namespace Runtime.Gameplay
 {
-    public sealed class GameManager : MonoBehaviour
+    public sealed class GameManager : MonoBehaviour, IGameManager
     {
-        private readonly PathfindingContext _pathfindingContext = new();
+        [SerializeField] private AssetLabelReference preloadLabel;
 
-        private void Start()
+        private Exception _preloadException;
+
+        public static IGameManager Instance { get; private set; }
+
+        private void Awake()
         {
-            UserInputManager.Instance.SelectCell += InstanceOnSelectCell;
+            if (Instance != null)
+            {
+                if (!ReferenceEquals(Instance, this))
+                    Destroy(this);
+                return;
+            }
+
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
 
-
-        private void InstanceOnSelectCell(object sender, EventArgs e)
+        private IEnumerator Start()
         {
-            var gridCell = GridManager.Instance.HoverCell;
-            if (gridCell == null || !gridCell.TerrainVariant.IsWalkable) return;
+            yield return ClearCacheIterator();
+            yield return PreloadDependenciesIterator();
+            yield return LoadHexWorldIterator();
+        }
+
+        private IEnumerator ClearCacheIterator()
+        {
+            if (!Application.isEditor || !CanContinuePreload()) yield break;
+
+            MessageBus.Instance.Publish(new GamePreloadingInfo("Clearing addressable cache"));
+
+            var y = Addressables.ClearDependencyCacheAsync(preloadLabel, true);
+            yield return y;
+        }
+
+        private IEnumerator PreloadDependenciesIterator()
+        {
+            if (!CanContinuePreload()) yield break;
+
+            MessageBus.Instance.Publish(new GamePreloadingInfo("Checking preload dependencies"));
+
+            var downloadSize = Addressables.GetDownloadSizeAsync(preloadLabel);
+            yield return downloadSize;
             
-            gridCell.ToggleSelected();
-            
-            if (gridCell.IsSelected)
+            ThrowIfAsyncOperationFails(downloadSize);
+            if (!CanContinuePreload()) yield break;
+
+            if (downloadSize.Result > 0)
             {
-                _pathfindingContext.AddWaypoint(gridCell);
+                MessageBus.Instance.Publish(new GamePreloadingInfo($"Need to download: {downloadSize.Result}"));
+
+                var dependencyPreloadOperation = Addressables.DownloadDependenciesAsync(preloadLabel);
+                yield return dependencyPreloadOperation;
+
+                ThrowIfAsyncOperationFails(dependencyPreloadOperation);
+                if (!CanContinuePreload()) yield break;
             }
             else
             {
-                _pathfindingContext.RemoveWaypoint(gridCell);
+                MessageBus.Instance.Publish(new GamePreloadingInfo("Nothing needed to download"));
             }
         }
 
-        private void OnDestroy()
+        private IEnumerator LoadHexWorldIterator()
         {
-            UserInputManager.Instance.SelectCell -= InstanceOnSelectCell;
+            if (!CanContinuePreload()) yield break;
+            MessageBus.Instance.Publish(new GamePreloadingInfo("Loading hex grid"));
+
+            var loadOperation = SceneManager.LoadSceneAsync(SceneDefinitions.GridSceneName, LoadSceneMode.Additive);
+            yield return loadOperation;
+            
+            MessageBus.Instance.Publish(new OnPreloadComplete());
+        }
+
+        private void ThrowIfAsyncOperationFails(AsyncOperationHandle operation)
+        {
+            if (operation.Status == AsyncOperationStatus.Succeeded) return;
+            _preloadException =
+                new Exception($"Unable to continue, async operation failed. OperationStatus={operation.Status}");
+        }
+
+        private bool CanContinuePreload()
+        {
+            return _preloadException == null;
         }
     }
 }

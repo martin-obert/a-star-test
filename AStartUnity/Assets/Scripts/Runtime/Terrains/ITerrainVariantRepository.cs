@@ -2,6 +2,6 @@
 {
     public interface ITerrainVariantRepository
     {
-        ITerrainVariant GetRandomTerrainVariant(int row, int col);
+        ITerrainVariant GetRandomTerrainVariant();
     }
 }

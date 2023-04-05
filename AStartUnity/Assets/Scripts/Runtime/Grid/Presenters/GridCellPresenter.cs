@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using Runtime.Grid.Data;
+using Runtime.Terrains;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -8,31 +9,24 @@ namespace Runtime.Grid.Presenters
     [RequireComponent(typeof(Renderer))]
     public sealed class GridCellPresenter : MonoBehaviour
     {
-        [SerializeField] private Color hoverColor = Color.yellow;
-        [SerializeField] private Color selectionColor = Color.green;
-
         private IGridCell _cell;
-
-        private MaterialPropertyBlock _selectedState;
-        private MaterialPropertyBlock _hoverState;
-        private MaterialPropertyBlock _normalState;
-        private static readonly int BaseColorProp = Shader.PropertyToID("_Color");
+        private MaterialPropertyBlock _materialOverrides;
         private Renderer _renderer;
+        [SerializeField] private Texture2D mainTexOverride;
+        [SerializeField] private TerrainVariant terrainVariant;
+        private static readonly int IsHovered = Shader.PropertyToID("_Is_Hovered");
+        private static readonly int IsSelected = Shader.PropertyToID("_Is_Selected");
         private static readonly int MainTex = Shader.PropertyToID("_MainTex");
+        public ITerrainVariant TerrainVariant => terrainVariant;
 
         private void Awake()
         {
             _renderer = GetComponent<Renderer>();
-
+            _materialOverrides = new MaterialPropertyBlock();
+            Assert.IsNotNull(terrainVariant, "terrainVariant != null");
             Assert.IsNotNull(_renderer, "_renderer != null");
-
-            _selectedState = new MaterialPropertyBlock();
-            _hoverState = new MaterialPropertyBlock();
-            _normalState = new MaterialPropertyBlock();
-
-            _selectedState.SetColor(BaseColorProp, selectionColor);
-            _hoverState.SetColor(BaseColorProp, hoverColor);
-            _normalState.SetColor(BaseColorProp, _renderer.material.GetColor(BaseColorProp));
+            _materialOverrides.SetTexture(MainTex, mainTexOverride);
+            _renderer.SetPropertyBlock(_materialOverrides);
         }
 
         private void OnDestroy()
@@ -43,6 +37,7 @@ namespace Runtime.Grid.Presenters
 
         public void SetDataModel(IGridCell cell)
         {
+            // TODO: check re-bind
             _cell = cell;
             Bind(cell);
         }
@@ -52,10 +47,6 @@ namespace Runtime.Grid.Presenters
             cell.PropertyChanged += CellOnPropertyChanged;
             name = $"row: {cell.RowIndex}, col: {cell.ColIndex}";
             transform.position = cell.WorldPosition;
-            _normalState.SetTexture(MainTex, cell.TerrainVariant.ColorTexture);
-            _hoverState.SetTexture(MainTex, cell.TerrainVariant.ColorTexture);
-            _selectedState.SetTexture(MainTex, cell.TerrainVariant.ColorTexture);
-            _renderer.SetPropertyBlock(_normalState);
         }
 
         private void CellOnPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -64,54 +55,21 @@ namespace Runtime.Grid.Presenters
 
             switch (e.PropertyName)
             {
+                case nameof(IGridCell.IsPinned):
                 case nameof(IGridCell.IsHighlighted):
                 {
-                    UpdateHoverState(cell);
+                    _materialOverrides.SetFloat(IsHovered, cell.IsHighlighted || cell.IsPinned ? 1 : 0);
+                    _renderer.SetPropertyBlock(_materialOverrides);
                     return;
                 }
                 case nameof(IGridCell.IsSelected):
                 {
-                    UpdateSelectionState(cell);
-                    return;
-                }
-                case nameof(IGridCell.IsPinned):
-                {
-                    UpdatePinState(cell);
+                    _materialOverrides.SetFloat(IsSelected, cell.IsSelected ? 1 : 0);
+                    _renderer.SetPropertyBlock(_materialOverrides);
                     return;
                 }
             }
+            
         }
-
-        private void UpdatePinState(IGridCell cell)
-        {
-            if(cell.IsSelected) return;
-            if (cell.IsPinned)
-            {
-                _renderer.SetPropertyBlock(_hoverState);
-            }
-            else
-            {
-                UpdateHoverState(cell);
-            }
-        }
-
-        private void UpdateSelectionState(IGridCell cell)
-        {
-            if (cell.IsSelected)
-            {
-                _renderer.SetPropertyBlock(_selectedState);
-            }
-            else
-            {
-                UpdateHoverState(cell);
-            }
-        }
-
-        private void UpdateHoverState(IGridCell cell)
-        {
-            if (cell.IsSelected || cell.IsPinned) return;
-            _renderer.SetPropertyBlock(cell.IsHighlighted ? _hoverState : _normalState);
-        }
-
     }
 }

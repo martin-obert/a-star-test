@@ -1,13 +1,16 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Runtime.Definitions;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
+using Runtime.Grid.Services;
 using Runtime.Terrains;
 
 namespace Runtime.Grid
 {
     public static class GridGenerator
     {
-        public static IGridCell[] GenerateGrid(int rowCount, int colCount, ITerrainVariantRepository repository)
+        public static IGridCell[] GenerateGrid(int rowCount, int colCount, ITerrainVariantRepository terrainVariantRepository)
         {
             // TODO: check args for negative values
 
@@ -17,15 +20,17 @@ namespace Runtime.Grid
             {
                 for (var col = 0; col < colCount; col++)
                 {
-                    result[row * colCount + col] = new GridCell
+                    var terrainVariant = terrainVariantRepository.GetRandomTerrainVariant();
+                    var gridCell = new GridCell
                     {
                         RowIndex = row,
                         ColIndex = col,
                         WorldPosition = GridCellHelpers.ToWorldCoords(row, col),
                         HeightHalf = GridDefinitions.HeightRadius,
                         WidthHalf = GridDefinitions.WidthRadius,
-                        TerrainVariant = repository.GetRandomTerrainVariant(row, col)
+                        TerrainVariant = terrainVariant
                     };
+                    result[row * colCount + col] = gridCell;
                 }
             }
 
@@ -38,7 +43,7 @@ namespace Runtime.Grid
             return result;
         }
 
-        public static IGridCell[] CollectNeighbours(IGridCell currentCell, IGridCell[] grid)
+        public static IEnumerable<IGridCell> CollectNeighbours(IGridCell currentCell, IGridCell[] grid)
         {
             var shift = currentCell.IsOddRow ? 0 : -1;
             var result = new[]

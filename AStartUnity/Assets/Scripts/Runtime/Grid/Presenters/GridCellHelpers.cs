@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Runtime.Definitions;
 using Runtime.Grid.Data;
 using UnityEngine;
 
 namespace Runtime.Grid.Presenters
 {
-    public static class GridDefinitions
-    {
-        public const float WidthRadius = .5f;
-        public const float HeightRadius = .5f;
-    }
-
     public static class GridCellHelpers
     {
         public static bool IsCellOdd(int rowIndex) => rowIndex % 2 != 0;
