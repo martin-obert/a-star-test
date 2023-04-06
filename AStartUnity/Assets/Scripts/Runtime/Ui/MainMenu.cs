@@ -5,6 +5,7 @@ using Cysharp.Threading.Tasks;
 using Runtime.Gameplay;
 using Runtime.Messaging;
 using Runtime.Messaging.Events;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -21,10 +22,18 @@ namespace Runtime.Ui
         {
             Assert.IsNotNull(startButton, "startButton != null");
             gameObject.SetActive(false);
-            MessageBus.Instance.Subscribe<OnPreloadComplete>(_ => gameObject.SetActive(true)).AddTo(_disposable);
-            MessageBus.Instance.Subscribe<OnGridInstantiated>(_ => gameObject.SetActive(false)).AddTo(_disposable);
 
-            startButton.onClick.AddListener(LoadInGameScene);
+            EventSubscriber.OnPreloadComplete()
+                .ObserveOnMainThread()
+                .Subscribe(_ => gameObject.SetActive(true))
+                .AddTo(_disposable);
+
+            EventSubscriber.OnGridInstantiated()
+                .ObserveOnMainThread()
+                .Subscribe(_ => gameObject.SetActive(false))
+                .AddTo(_disposable);
+
+            startButton.onClick.AsObservable().Subscribe(_ => LoadInGameScene()).AddTo(this);
         }
 
         private void LoadInGameScene()
@@ -42,7 +51,7 @@ namespace Runtime.Ui
                 catch (Exception e)
                 {
                     Debug.LogException(e);
-                    await MessageBus.Instance.PublishOnMainThreadAsync(new GameFatalError("Failed to load scene"));
+                    EventPublisher.OnGameFatalError("Failed to load scene");
                 }
             });
         }

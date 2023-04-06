@@ -1,6 +1,6 @@
 ﻿namespace Runtime.Messaging.Events
 {
-    public class OnGridInstantiated
+    public sealed class PreloadComplete
     {
         
     }

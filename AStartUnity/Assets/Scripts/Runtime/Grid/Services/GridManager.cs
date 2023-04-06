@@ -121,7 +121,7 @@ namespace Runtime.Grid.Services
             _rect = Rect.MinMaxRect(minCell.WorldPosition.x, minCell.WorldPosition.z, maxCell.WorldPosition.x,
                 maxCell.WorldPosition.z);
 
-            MessageBus.Instance.Publish(new OnGridInstantiated());
+            EventPublisher.OnGridInstantiated();
         }
 
         public bool IsPointOnGrid(Vector2 point) => _rect.Contains(point);

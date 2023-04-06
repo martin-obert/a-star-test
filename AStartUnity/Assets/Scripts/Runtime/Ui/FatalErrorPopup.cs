@@ -2,6 +2,7 @@
 using Runtime.Messaging;
 using Runtime.Messaging.Events;
 using TMPro;
+using UniRx;
 using UnityEngine;
 
 namespace Runtime.Ui
@@ -14,11 +15,14 @@ namespace Runtime.Ui
 
         private void Awake()
         {
-            _subHook = MessageBus.Instance.Subscribe<GameFatalError>(x =>
+            EventSubscriber.OnGameFatalError()
+                .ObserveOnMainThread()
+                .Subscribe(x =>
             {
                 gameObject.SetActive(true);
                 messageLabel.text = x.Message;
-            });
+            }).AddTo(this);
+            
             gameObject.SetActive(false);
         }
 

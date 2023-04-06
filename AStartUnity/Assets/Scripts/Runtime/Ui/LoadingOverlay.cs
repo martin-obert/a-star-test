@@ -1,6 +1,7 @@
 ﻿using Runtime.Messaging;
 using Runtime.Messaging.Events;
 using TMPro;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -15,12 +16,14 @@ namespace Runtime.Ui
         {
             Assert.IsNotNull(infoLabel, "infoLabel != null");
             
-            MessageBus.Instance
-                .Subscribe<GamePreloadingInfo>(x => infoLabel.text = x.Message)
+            EventSubscriber.OnGamePreloadingInfo()
+                .ObserveOnMainThread()
+                .Subscribe(x => infoLabel.text = x.Message)
                 .AddTo(_disposable);
             
-            MessageBus.Instance
-                .Subscribe<OnPreloadComplete>(x => gameObject.SetActive(false))
+            EventSubscriber.OnPreloadComplete()
+                .ObserveOnMainThread()
+                .Subscribe(x => gameObject.SetActive(false))
                 .AddTo(_disposable);
         }
 
