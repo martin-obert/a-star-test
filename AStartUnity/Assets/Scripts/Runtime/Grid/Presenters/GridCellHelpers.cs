@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Runtime.Definitions;
 using Runtime.Grid.Data;
 using UnityEngine;
@@ -39,12 +41,20 @@ namespace Runtime.Grid.Presenters
         public static IGridCell GetCellByWorldPoint(Vector2 cursorPosition,
             IEnumerable<IGridCell> cells)
         {
-            var boxHitCastResults = cells.Where(x => IsBoxCastHit(x, cursorPosition)).ToArray();
+            var gridCells = cells.ToArray();
+            var result = new ConcurrentBag<IGridCell>();
+            Parallel.ForEach(gridCells, c =>
+            {
+                if (!IsBoxCastHit(c, cursorPosition)) return;
+                result.Add(c);
+            });
+            if (result.IsEmpty) return null;
+            if (result.Count == 1)
+            {
+                return result.First();
+            }
 
-            if (boxHitCastResults.Length == 0) return null;
-            if (boxHitCastResults.Length <= 1) return boxHitCastResults[0];
-
-            var circleCastResult = boxHitCastResults.Where(x => IsCircleCastHit(x, cursorPosition)).ToArray();
+            var circleCastResult = result.Where(x => IsCircleCastHit(x, cursorPosition)).ToArray();
             if (circleCastResult.Length == 1)
             {
                 return circleCastResult[0];
@@ -54,8 +64,8 @@ namespace Runtime.Grid.Presenters
             {
                 // TODO: hexagon shape cast result
             }
-            return null;
 
+            return null;
         }
 
 

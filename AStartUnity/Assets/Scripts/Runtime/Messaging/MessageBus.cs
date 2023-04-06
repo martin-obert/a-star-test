@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 
 namespace Runtime.Messaging
 {
@@ -45,18 +46,22 @@ namespace Runtime.Messaging
         public void Publish<T>(T value)
         {
             ThrowIfAlreadyDisposed();
-
             if (!_observers.TryGetValue(typeof(T), out var observers))
             {
                 return;
             }
-
             var subscriptions = observers.ToArray();
-            
             foreach (var observer in subscriptions)
             {
                 observer.OnNext(value);
             }
+          
+        }
+        public async UniTask PublishOnMainThreadAsync<T>(T value)
+        {
+            ThrowIfAlreadyDisposed();
+            await UniTask.SwitchToMainThread();
+            Publish(value);
         }
 
 

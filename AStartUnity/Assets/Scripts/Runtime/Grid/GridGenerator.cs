@@ -18,9 +18,9 @@ namespace Runtime.Grid
 
             var result = new IGridCell[rowCount * colCount];
 
-            for (var row = 0; row < rowCount; row++)
+            Parallel.For(0, rowCount, row =>
             {
-                for (var col = 0; col < colCount; col++)
+                Parallel.For(0, colCount, col =>
                 {
                     var terrainVariant = terrainVariantRepository.GetRandomTerrainVariant();
                     var gridCell = new GridCell
@@ -33,8 +33,8 @@ namespace Runtime.Grid
                         TerrainVariant = terrainVariant
                     };
                     result[row * colCount + col] = gridCell;
-                }
-            }
+                });
+            });
 
             Parallel.ForEach(result, gridCell =>
             {

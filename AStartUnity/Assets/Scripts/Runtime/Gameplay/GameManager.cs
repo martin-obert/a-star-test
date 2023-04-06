@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections;
-using Runtime.Definitions;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Runtime.Messaging;
 using Runtime.Messaging.Events;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 
 namespace Runtime.Gameplay
@@ -14,11 +13,7 @@ namespace Runtime.Gameplay
     {
         [SerializeField] private AssetLabelReference preloadLabel;
         [SerializeField] private AssetReference worldToLoad;
-
-        private Exception _preloadException;
-
         public static IGameManager Instance { get; private set; }
-
         private void Awake()
         {
             if (Instance != null)
@@ -32,72 +27,72 @@ namespace Runtime.Gameplay
             DontDestroyOnLoad(gameObject);
         }
 
-        private IEnumerator Start()
+        private void Start()
         {
-            yield return ClearCacheIterator();
-            yield return PreloadDependenciesIterator();
-            yield return LoadHexWorldIterator();
+            PreDownloadAssets();
         }
 
-        private IEnumerator ClearCacheIterator()
+        private void PreDownloadAssets()
         {
-            if (!Application.isEditor || !CanContinuePreload()) yield break;
-
-            MessageBus.Instance.Publish(new GamePreloadingInfo("Clearing addressable cache"));
-
-            var y = Addressables.ClearDependencyCacheAsync(preloadLabel, true);
-            yield return y;
-        }
-
-        private IEnumerator PreloadDependenciesIterator()
-        {
-            if (!CanContinuePreload()) yield break;
-
-            MessageBus.Instance.Publish(new GamePreloadingInfo("Checking preload dependencies"));
-
-            var downloadSize = Addressables.GetDownloadSizeAsync(preloadLabel);
-            yield return downloadSize;
-
-            ThrowIfAsyncOperationFails(downloadSize);
-            if (!CanContinuePreload()) yield break;
-
-            if (downloadSize.Result > 0)
+            UniTask.Void(async () =>
             {
-                MessageBus.Instance.Publish(new GamePreloadingInfo($"Need to download: {downloadSize.Result}"));
+                using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(3));
+                try
+                {
+                    await UniTask.SwitchToMainThread();
+                    await ClearCacheAsync(cancellationTokenSource.Token);
+                    await PreloadDependenciesAsync(cancellationTokenSource.Token);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                    await MessageBus.Instance.PublishOnMainThreadAsync(new GameFatalError("Failed to initialize game"));
+                }
+            });
+        }
 
-                var dependencyPreloadOperation = Addressables.DownloadDependenciesAsync(preloadLabel);
-                yield return dependencyPreloadOperation;
+        private async UniTask ClearCacheAsync(CancellationToken cancellationToken)
+        {
+            if (!Application.isEditor) return;
 
-                ThrowIfAsyncOperationFails(dependencyPreloadOperation);
-                if (!CanContinuePreload()) yield break;
+            await MessageBus.Instance.PublishOnMainThreadAsync(new GamePreloadingInfo("Clearing addressable cache"));
+
+            await Addressables.ClearDependencyCacheAsync(preloadLabel, true)
+                .WithCancellation(cancellationToken);
+
+            await MessageBus.Instance.PublishOnMainThreadAsync(new GamePreloadingInfo("Cache cleared"));
+        }
+
+        private async UniTask PreloadDependenciesAsync(CancellationToken cancellationToken)
+        {
+            await MessageBus.Instance.PublishOnMainThreadAsync(new GamePreloadingInfo("Checking preload dependencies"));
+
+            var downloadSize = await Addressables.GetDownloadSizeAsync(preloadLabel)
+                .WithCancellation(cancellationToken);
+
+            if (downloadSize > 0)
+            {
+                await MessageBus.Instance.PublishOnMainThreadAsync(
+                    new GamePreloadingInfo($"Need to download: {downloadSize} bytes"));
+
+                await Addressables.DownloadDependenciesAsync(preloadLabel)
+                    .WithCancellation(cancellationToken);
             }
             else
             {
-                MessageBus.Instance.Publish(new GamePreloadingInfo("Nothing needed to download"));
+                await MessageBus.Instance.PublishOnMainThreadAsync(new GamePreloadingInfo("Nothing needed to download"));
             }
+            
+            await MessageBus.Instance.PublishOnMainThreadAsync(new OnPreloadComplete());
         }
 
-        private IEnumerator LoadHexWorldIterator()
+        public async UniTask LoadHexWorldAsync(CancellationToken cancellationToken)
         {
-            if (!CanContinuePreload()) yield break;
-            MessageBus.Instance.Publish(new GamePreloadingInfo("Loading hex grid"));
+            await MessageBus.Instance.PublishOnMainThreadAsync(new GamePreloadingInfo("Loading hex grid"));
 
-            var loadOperation = Addressables.LoadSceneAsync(worldToLoad, LoadSceneMode.Additive);
-            yield return loadOperation;
+            await Addressables.LoadSceneAsync(worldToLoad, LoadSceneMode.Additive)
+                .WithCancellation(cancellationToken);
 
-            MessageBus.Instance.Publish(new OnPreloadComplete());
-        }
-
-        private void ThrowIfAsyncOperationFails(AsyncOperationHandle operation)
-        {
-            if (operation.Status == AsyncOperationStatus.Succeeded) return;
-            _preloadException =
-                new Exception($"Unable to continue, async operation failed. OperationStatus={operation.Status}");
-        }
-
-        private bool CanContinuePreload()
-        {
-            return _preloadException == null;
         }
     }
 }

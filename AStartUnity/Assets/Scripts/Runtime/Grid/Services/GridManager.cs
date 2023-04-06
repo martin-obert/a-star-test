@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using Runtime.Gameplay;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
 using Runtime.Inputs;
+using Runtime.Messaging;
+using Runtime.Messaging.Events;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -40,14 +43,19 @@ namespace Runtime.Grid.Services
             Instance = this;
         }
 
-        private IEnumerator Start()
+        private void Start()
         {
-            yield return gridCellRepository.Init();
-            if (autoGenerateGridOnStart)
+            UniTask.Void(async () =>
             {
-                GenerateGrid();
-            }
+                await UniTask.SwitchToMainThread();
+                
+                await gridCellRepository.InitAsync();
+                if (autoGenerateGridOnStart)
+                {
+                    GenerateGrid();
+                }
 
+            });
             UserInputManager.Instance.SelectCell += InstanceOnSelectCell;
 
         }
@@ -115,6 +123,8 @@ namespace Runtime.Grid.Services
             var maxCell = GridCellHelpers.GetCellByCoords(CurrentCells, rowCount - 1, colCount - 1);
             _rect = Rect.MinMaxRect(minCell.WorldPosition.x, minCell.WorldPosition.z, maxCell.WorldPosition.x,
                 maxCell.WorldPosition.z);
+
+            MessageBus.Instance.Publish(new OnGridInstantiated());
         }
 
         public bool IsPointOnGrid(Vector2 point) => _rect.Contains(point);

@@ -3,7 +3,6 @@ using Runtime.Messaging.Events;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.SceneManagement;
 
 namespace Runtime.Ui
 {
@@ -19,6 +18,7 @@ namespace Runtime.Ui
             MessageBus.Instance
                 .Subscribe<GamePreloadingInfo>(x => infoLabel.text = x.Message)
                 .AddTo(_disposable);
+            
             MessageBus.Instance
                 .Subscribe<OnPreloadComplete>(x => gameObject.SetActive(false))
                 .AddTo(_disposable);
