@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using Cysharp.Threading.Tasks;
 using Runtime.Gameplay;
 using Runtime.Grid.Data;
@@ -12,7 +11,7 @@ using UnityEngine.Assertions;
 
 namespace Runtime.Grid.Services
 {
-    public sealed class GridManager : MonoBehaviour, IGridManager
+    public sealed class GridManager : MonoBehaviour, IGridManager, IDisposable
     {
         private readonly PathfindingContext _pathfindingContext = new();
         private readonly IGridRaycaster _gridRaycaster = new GridRaycaster();
@@ -48,16 +47,14 @@ namespace Runtime.Grid.Services
             UniTask.Void(async () =>
             {
                 await UniTask.SwitchToMainThread();
-                
+
                 await gridCellRepository.InitAsync();
                 if (autoGenerateGridOnStart)
                 {
                     GenerateGrid();
                 }
-
             });
             UserInputManager.Instance.SelectCell += InstanceOnSelectCell;
-
         }
 
         private void InstanceOnSelectCell(object sender, EventArgs e)
@@ -74,19 +71,19 @@ namespace Runtime.Grid.Services
             }
             else
             {
-                _pathfindingContext.RemoveWaypoint(gridCell);
+                _pathfindingContext.RemoveWaypoint();
             }
         }
 
         private void OnDestroy()
         {
-            UserInputManager.Instance.SelectCell -= InstanceOnSelectCell;
+            Dispose();
         }
 
 
         private void Update()
         {
-            if(CurrentCells == null) return;
+            if (CurrentCells == null) return;
 
             var ray = _gridRaycaster.GetRayFromMousePosition(UserInputManager.Instance.MousePosition);
 
@@ -128,5 +125,11 @@ namespace Runtime.Grid.Services
         }
 
         public bool IsPointOnGrid(Vector2 point) => _rect.Contains(point);
+
+        public void Dispose()
+        {
+            UserInputManager.Instance.SelectCell -= InstanceOnSelectCell;
+            _pathfindingContext?.Dispose();
+        }
     }
 }

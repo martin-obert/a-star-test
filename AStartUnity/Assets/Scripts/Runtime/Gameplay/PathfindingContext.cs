@@ -1,18 +1,24 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using PathFinding;
 using Runtime.Grid.Data;
 
 namespace Runtime.Gameplay
 {
-    public sealed class PathfindingContext
+    public sealed class PathfindingContext : IDisposable
     {
         private IGridCell _start;
         private IGridCell _destination;
         private IGridCell[] _selectedPath;
-
+        private bool _isPlotting;
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
 
         public void AddWaypoint(IGridCell gridCell)
         {
+            if(_isPlotting) return;
+
             if (_start != null && _destination != null)
             {
                 ClearWaypoint(_start);
@@ -37,8 +43,30 @@ namespace Runtime.Gameplay
             }
 
             if (_start == null || _destination == null) return;
-            _selectedPath = AStar.GetPath(_start, _destination).OfType<IGridCell>().ToArray();
-            HighlightPath();
+            UniTask.Void(async () =>
+            {
+                try
+                {
+                    _isPlotting = true;
+
+                    await UniTask.SwitchToThreadPool();
+                    
+                    _selectedPath = AStar.GetPath(_start, _destination).OfType<IGridCell>().ToArray();
+                    
+                    await UniTask.SwitchToMainThread(_cancellationTokenSource.Token);
+                    
+                    HighlightPath();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
+                finally
+                {
+                    _isPlotting = false;
+                }
+            });
         }
 
         private static bool DoesWaypointOverlap(IGridCell a, IGridCell b)
@@ -46,7 +74,7 @@ namespace Runtime.Gameplay
             return ReferenceEquals(a, b);
         }
 
-        public void RemoveWaypoint(IGridCell gridCell)
+        public void RemoveWaypoint()
         {
             ClearWaypoint(_start);
             _start = null;
@@ -85,6 +113,11 @@ namespace Runtime.Gameplay
             }
 
             _selectedPath = null;
+        }
+
+        public void Dispose()
+        {
+            _cancellationTokenSource?.Dispose();
         }
     }
 }
