@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Runtime.Gameplay;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
@@ -12,9 +13,9 @@ namespace Runtime.Grid.Services
     {
         private readonly PathfindingContext _pathfindingContext = new();
         private readonly IGridRaycaster _gridRaycaster = new GridRaycaster();
-        
+
         private Rect _rect;
-        
+
         public IGridCell[] CurrentCells { get; private set; }
         public IGridCell HoverCell { get; private set; }
         public static IGridManager Instance { get; private set; }
@@ -39,14 +40,16 @@ namespace Runtime.Grid.Services
             Instance = this;
         }
 
-        private void Start()
+        private IEnumerator Start()
         {
+            yield return gridCellRepository.Init();
             if (autoGenerateGridOnStart)
             {
                 GenerateGrid();
             }
 
             UserInputManager.Instance.SelectCell += InstanceOnSelectCell;
+
         }
 
         private void InstanceOnSelectCell(object sender, EventArgs e)
@@ -75,6 +78,8 @@ namespace Runtime.Grid.Services
 
         private void Update()
         {
+            if(CurrentCells == null) return;
+
             var ray = _gridRaycaster.GetRayFromMousePosition(UserInputManager.Instance.MousePosition);
 
             if (!_gridRaycaster.TryGetHitOnGrid(ray, out var hitPoint)) return;
@@ -95,8 +100,8 @@ namespace Runtime.Grid.Services
                 HoverCell = null;
             }
         }
-        
-        
+
+
         public void GenerateGrid()
         {
             CurrentCells = GridGenerator.GenerateGrid(rowCount, colCount, gridCellRepository);
@@ -111,7 +116,7 @@ namespace Runtime.Grid.Services
             _rect = Rect.MinMaxRect(minCell.WorldPosition.x, minCell.WorldPosition.z, maxCell.WorldPosition.x,
                 maxCell.WorldPosition.z);
         }
-        
+
         public bool IsPointOnGrid(Vector2 point) => _rect.Contains(point);
     }
 }

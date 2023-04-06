@@ -45,12 +45,17 @@ namespace Runtime.Grid.Presenters
             if (boxHitCastResults.Length <= 1) return boxHitCastResults[0];
 
             var circleCastResult = boxHitCastResults.Where(x => IsCircleCastHit(x, cursorPosition)).ToArray();
-            if (circleCastResult.Length == 0)
+            if (circleCastResult.Length == 1)
             {
-                throw new Exception("This should not happen");
+                return circleCastResult[0];
             }
 
-            return circleCastResult[0];
+            if (circleCastResult.Length > 1)
+            {
+                // TODO: hexagon shape cast result
+            }
+            return null;
+
         }
 
 

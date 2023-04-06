@@ -13,6 +13,7 @@ namespace Runtime.Gameplay
     public sealed class GameManager : MonoBehaviour, IGameManager
     {
         [SerializeField] private AssetLabelReference preloadLabel;
+        [SerializeField] private AssetReference worldToLoad;
 
         private Exception _preloadException;
 
@@ -56,7 +57,7 @@ namespace Runtime.Gameplay
 
             var downloadSize = Addressables.GetDownloadSizeAsync(preloadLabel);
             yield return downloadSize;
-            
+
             ThrowIfAsyncOperationFails(downloadSize);
             if (!CanContinuePreload()) yield break;
 
@@ -81,9 +82,9 @@ namespace Runtime.Gameplay
             if (!CanContinuePreload()) yield break;
             MessageBus.Instance.Publish(new GamePreloadingInfo("Loading hex grid"));
 
-            var loadOperation = SceneManager.LoadSceneAsync(SceneDefinitions.GridSceneName, LoadSceneMode.Additive);
+            var loadOperation = Addressables.LoadSceneAsync(worldToLoad, LoadSceneMode.Additive);
             yield return loadOperation;
-            
+
             MessageBus.Instance.Publish(new OnPreloadComplete());
         }
 

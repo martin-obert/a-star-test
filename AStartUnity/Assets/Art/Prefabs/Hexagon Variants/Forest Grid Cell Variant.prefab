@@ -11,6 +11,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Forest Grid Cell Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 184114, guid: 29136d98fc724aa4d9666c00e2aeab07, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 19
+      objectReference: {fileID: 0}
     - target: {fileID: 484784, guid: 29136d98fc724aa4d9666c00e2aeab07, type: 3}
       propertyPath: m_RootOrder
       value: 0

@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Runtime.Definitions;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
-using Runtime.Grid.Services;
 using Runtime.Terrains;
 
 namespace Runtime.Grid
@@ -12,7 +13,8 @@ namespace Runtime.Grid
     {
         public static IGridCell[] GenerateGrid(int rowCount, int colCount, ITerrainVariantRepository terrainVariantRepository)
         {
-            // TODO: check args for negative values
+            if (rowCount <= 0) throw new ArgumentOutOfRangeException(nameof(rowCount), rowCount, "must be greater than 0");
+            if (colCount <= 0) throw new ArgumentOutOfRangeException(nameof(colCount), colCount, "must be greater than 0");
 
             var result = new IGridCell[rowCount * colCount];
 
@@ -34,11 +36,11 @@ namespace Runtime.Grid
                 }
             }
 
-            foreach (var gridCell in result)
+            Parallel.ForEach(result, gridCell =>
             {
                 var neighbours = CollectNeighbours(gridCell, result);
                 gridCell.SetNeighbours(neighbours);
-            }
+            });
 
             return result;
         }
