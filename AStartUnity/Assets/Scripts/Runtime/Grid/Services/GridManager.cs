@@ -5,7 +5,6 @@ using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
 using Runtime.Inputs;
 using Runtime.Messaging;
-using Runtime.Messaging.Events;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -36,10 +35,20 @@ namespace Runtime.Grid.Services
                 return;
             }
 
+            ReadGameManagerSetup();
             Assert.IsNotNull(gridCellRepository, "gridCellRepository != null");
             Assert.IsTrue(rowCount > 0, "rowCount > 0");
             Assert.IsTrue(colCount > 0, "colCount > 0");
+            Debug.Log($"rows - {rowCount}, cols - {colCount}");
             Instance = this;
+        }
+
+        private void ReadGameManagerSetup()
+        {
+            if (GameManager.Instance is not { GridSetup: { } }) return;
+            rowCount = GameManager.Instance.GridSetup.RowCount;
+            colCount = GameManager.Instance.GridSetup.ColCount;
+            Debug.Log($"Reading game manager grid setup");
         }
 
         private void Start()
@@ -125,6 +134,7 @@ namespace Runtime.Grid.Services
         }
 
         public bool IsPointOnGrid(Vector2 point) => _rect.Contains(point);
+        public Vector2 Center => _rect.center;
 
         public void Dispose()
         {

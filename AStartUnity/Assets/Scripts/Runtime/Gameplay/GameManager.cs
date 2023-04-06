@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Runtime.Grid.Services;
 using Runtime.Messaging;
 using Runtime.Messaging.Events;
 using UniRx;
@@ -14,6 +15,9 @@ namespace Runtime.Gameplay
     {
         [SerializeField] private AssetLabelReference preloadLabel;
         [SerializeField] private AssetReference worldToLoad;
+        
+        public GridSetup GridSetup { get; set; }
+
         public static IGameManager Instance { get; private set; }
         private void Awake()
         {
@@ -94,5 +98,6 @@ namespace Runtime.Gameplay
                 .WithCancellation(cancellationToken);
 
         }
+
     }
 }

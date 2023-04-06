@@ -7,5 +7,6 @@ namespace Runtime.Grid.Services
     {
         IGridCell HoverCell { get; }
         bool IsPointOnGrid(Vector2 point);
+        Vector2 Center { get; }
     }
 }

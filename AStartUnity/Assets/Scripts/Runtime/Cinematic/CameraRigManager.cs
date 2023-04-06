@@ -1,5 +1,8 @@
-﻿using Runtime.Grid.Services;
+﻿using Cysharp.Threading.Tasks;
+using Runtime.Grid.Services;
 using Runtime.Inputs;
+using Runtime.Messaging;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -8,14 +11,18 @@ namespace Runtime.Cinematic
     [RequireComponent(typeof(Camera))]
     public sealed class CameraRigManager : MonoBehaviour
     {
-        private Camera _camera;
         [SerializeField] private float cameraSpeed = 1;
         [SerializeField] private Transform root;
 
         private void Awake()
         {
             Assert.IsNotNull(root, "root != null");
-            _camera = GetComponent<Camera>();
+            EventSubscriber.OnGridInstantiated().Subscribe(x =>
+            {
+                var center = GridManager.Instance.Center;
+
+                root.transform.position = new Vector3(center.x, 0, center.y);
+            }).AddTo(this);
         }
 
         private void Update()

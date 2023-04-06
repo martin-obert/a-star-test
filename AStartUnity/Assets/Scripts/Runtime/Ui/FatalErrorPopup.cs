@@ -30,10 +30,5 @@ namespace Runtime.Ui
         {
             _subHook?.Dispose();
         }
-
-        public void QuitApp()
-        {
-            Application.Quit();
-        }
     }
 }
