@@ -10,7 +10,7 @@ namespace Runtime.Grid
 {
     public static class GridGenerator
     {
-        public static IGridCell[] GenerateGrid(int rowCount, int colCount, ITerrainVariantRepository terrainVariantRepository)
+        public static IGridCell[] GenerateGrid(int rowCount, int colCount, Func<ITerrainVariant> getRandomTerrainVariant)
         {
             if (rowCount <= 0) throw new ArgumentOutOfRangeException(nameof(rowCount), rowCount, "must be greater than 0");
             if (colCount <= 0) throw new ArgumentOutOfRangeException(nameof(colCount), colCount, "must be greater than 0");
@@ -21,7 +21,7 @@ namespace Runtime.Grid
             {
                 Parallel.For(0, colCount, col =>
                 {
-                    var terrainVariant = terrainVariantRepository.GetRandomTerrainVariant();
+                    var terrainVariant = getRandomTerrainVariant();
                     result[row * colCount + col] = GridCellFactory.Create(row, col, terrainVariant);
                 });
             });
@@ -34,7 +34,7 @@ namespace Runtime.Grid
         {
             Parallel.ForEach(grid, gridCell =>
             {
-                var neighbours = GridGenerator.CollectNeighbours(gridCell, grid);
+                var neighbours = CollectNeighbours(gridCell, grid);
                 gridCell.SetNeighbours(neighbours);
             });
 

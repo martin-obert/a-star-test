@@ -22,10 +22,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - preload
-  - m_GUID: 44953279cb172e248a7c2207248727b0
-    m_Address: Assets/Art/Materials/mat_mainTile.mat
-    m_ReadOnly: 0
-    m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: dbed9c6d90e0d7842beefa1e1c08d92a, type: 2}
   m_SchemaSet:

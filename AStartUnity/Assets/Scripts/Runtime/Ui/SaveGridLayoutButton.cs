@@ -17,7 +17,11 @@ namespace Runtime.Ui
 
         public void SaveLayout()
         {
-            UniTask.Void(async () => await UnitOfWork.Instance.GridManager.SaveLayoutAsync(_cSource.Token));
+            UniTask.Void(async () =>
+            {
+                var cells = ServiceInjector.Instance.GridService.Cells;
+                await ServiceInjector.Instance.GridLayoutRepository.SaveAsync(cells, _cSource.Token);
+            });
         }
     }
 }

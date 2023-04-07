@@ -19,23 +19,16 @@ namespace Runtime.Grid
                 HeightHalf = GridDefinitions.HeightRadius,
                 WidthHalf = GridDefinitions.WidthRadius,
                 TerrainVariant = terrainVariant,
-                IsWalkable = terrainVariant.IsWalkable
+                IsWalkable = terrainVariant.IsWalkable,
+                TerrainType = terrainVariant.Type,
+                DaysTravelCost = terrainVariant.DaysTravelCost
             };
         }
         
         public static IGridCell Create(int row, int col, TerrainType type, IEnumerable<ITerrainVariant> terrainVariants)
         {
             var terrainVariant = terrainVariants.First(x => x.Type == type);
-            return new GridCell
-            {
-                RowIndex = row,
-                ColIndex = col,
-                WorldPosition = GridCellHelpers.ToWorldCoords(row, col),
-                HeightHalf = GridDefinitions.HeightRadius,
-                WidthHalf = GridDefinitions.WidthRadius,
-                TerrainVariant = terrainVariant,
-                IsWalkable = terrainVariant.IsWalkable
-            };
+            return Create(row, col, terrainVariant);
         }
     }
 }

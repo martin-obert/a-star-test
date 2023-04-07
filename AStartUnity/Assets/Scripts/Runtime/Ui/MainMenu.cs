@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Threading;
 using Cysharp.Threading.Tasks;
-using Runtime.Gameplay;
 using Runtime.Grid.Services;
 using Runtime.Messaging;
 using TMPro;
@@ -17,10 +15,9 @@ namespace Runtime.Ui
         [SerializeField] private Button startButton;
         [SerializeField] private TMP_InputField rowsInput;
         [SerializeField] private TMP_InputField colsInput;
-        
-        private readonly CompositeDisposable _disposable= new();
 
-        private IGameManager _gameManager;
+        private readonly CompositeDisposable _disposable = new();
+
         private EventPublisher _eventPublisher;
 
         private int _parsedRows;
@@ -35,10 +32,9 @@ namespace Runtime.Ui
 
         private void Start()
         {
-            _gameManager = UnitOfWork.Instance.GameManager;
-            _eventPublisher = UnitOfWork.Instance.EventPublisher;
-            var eventSubscriber = UnitOfWork.Instance.EventSubscriber;
-            
+            _eventPublisher = ServiceInjector.Instance.EventPublisher;
+            var eventSubscriber = ServiceInjector.Instance.EventSubscriber;
+
             ParseInputs();
 
             rowsInput.onValueChanged.AsObservable()
@@ -81,18 +77,9 @@ namespace Runtime.Ui
 
             UniTask.Void(async () =>
             {
-                using var cSource = new CancellationTokenSource(TimeSpan.FromSeconds(5));
                 try
                 {
-                    UnitOfWork.Instance.SceneContextManager.SetContext(new SceneContext
-                        {
-                            ColCount = _parsedCols,
-                            RowCount = _parsedRows
-                        }
-                    );
-                    
-                    await UniTask.SwitchToMainThread(cSource.Token);
-                    await _gameManager.LoadHexWorldAsync(cSource.Token);
+                    await ServiceInjector.Instance.SceneManagementService.LoadWorldAsync(_parsedCols, _parsedRows);
                 }
                 catch (Exception e)
                 {

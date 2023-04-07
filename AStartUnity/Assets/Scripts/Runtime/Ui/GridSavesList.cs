@@ -1,18 +1,14 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
+﻿using Cysharp.Threading.Tasks;
 using Runtime.Grid.Services;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace Runtime.Ui
 {
     public sealed class GridSavesList : MonoBehaviour
     {
         [SerializeField] private GridSavesListItem itemPrefab;
-
         [SerializeField] private Transform container;
-
+        
         private void Awake()
         {
             if (!container)
@@ -21,23 +17,19 @@ namespace Runtime.Ui
 
         private void Start()
         {
-            var saves = UnitOfWork.Instance.GridLayoutRepository.ListSaves();
-            foreach (var save in saves)
+            var layoutRepository = ServiceInjector.Instance.GridLayoutRepository;
+            var addressable = ServiceInjector.Instance.AddressableManager;
+            var gameManager = ServiceInjector.Instance.SceneManagementService;
+            var listSaves = layoutRepository.ListSaves();
+            
+            foreach (var save in listSaves)
             {
-                Instantiate(itemPrefab, container).Bind(save, (s) =>
-                {
-                    UniTask.Void(async () =>
+                Instantiate(itemPrefab, container)
+                    .Bind(save, filename => UniTask.Void(async () =>
                     {
-                        var cells = await UnitOfWork.Instance.GridLayoutRepository.LoadAsync(s);
-                        UnitOfWork.Instance.SceneContextManager.SetContext(new SceneContext
-                        {
-                            Cells = cells,
-                            ColCount = cells.Max(x => x.ColIndex),
-                            RowCount = cells.Max(x => x.RowIndex)
-                        });
-                        await UnitOfWork.Instance.GameManager.LoadHexWorldAsync(default);
-                    });
-                });
+                        var cells = await layoutRepository.LoadAsync(filename, addressable.GetTerrainVariants());                        
+                        await gameManager.LoadLayoutAsync(cells);
+                    }));
             }
         }
     }

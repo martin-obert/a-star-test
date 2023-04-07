@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 2339430}
   - component: {fileID: 6434712}
   - component: {fileID: 8186716991589409226}
-  - component: {fileID: 6489577715421843988}
   m_Layer: 0
   m_Name: Hexagon_Model
   m_TagString: hexTile
@@ -113,18 +112,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainTexOverride: {fileID: 0}
-  terrainVariant: {fileID: 6489577715421843988}
---- !u!114 &6489577715421843988
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 184114}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b461dc1cc0164f93a1d8f83f8d011a4b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  daysTravelCost: 1
-  isWalkable: 1
+  terrainVariant: {fileID: 0}

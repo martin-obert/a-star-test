@@ -16,13 +16,10 @@ namespace Runtime.Ui
 
         private EventSubscriber _eventSubscriber;
         
-        private void Awake()
-        {
-            _eventSubscriber = UnitOfWork.Instance.EventSubscriber;
-        }
-
         private void Start()
         {
+            _eventSubscriber = Grid.Services.ServiceInjector.Instance.EventSubscriber;
+
             _subHook?.Dispose();
             
             _eventSubscriber.OnGameFatalError()

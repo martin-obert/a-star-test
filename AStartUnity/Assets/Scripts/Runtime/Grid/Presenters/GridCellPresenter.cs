@@ -12,21 +12,15 @@ namespace Runtime.Grid.Presenters
         private IGridCell _cell;
         private MaterialPropertyBlock _materialOverrides;
         private Renderer _renderer;
-        [SerializeField] private Texture2D mainTexOverride;
-        [SerializeField] private TerrainVariant terrainVariant;
         private static readonly int IsHovered = Shader.PropertyToID("_Is_Hovered");
         private static readonly int IsSelected = Shader.PropertyToID("_Is_Selected");
         private static readonly int MainTex = Shader.PropertyToID("_MainTex");
-        public ITerrainVariant TerrainVariant => terrainVariant;
-
         private void Awake()
         {
             _renderer = GetComponent<Renderer>();
-            _materialOverrides = new MaterialPropertyBlock();
-            Assert.IsNotNull(terrainVariant, "terrainVariant != null");
             Assert.IsNotNull(_renderer, "_renderer != null");
-            _materialOverrides.SetTexture(MainTex, mainTexOverride);
-            _renderer.SetPropertyBlock(_materialOverrides);
+
+            
         }
 
         private void OnDestroy()
@@ -35,11 +29,13 @@ namespace Runtime.Grid.Presenters
             _cell.PropertyChanged -= CellOnPropertyChanged;
         }
 
-        public void SetDataModel(IGridCell cell)
+        public void SetDataModel(IGridCell cell, ITerrainVariant terrainVariant)
         {
-            // TODO: check re-bind
             _cell = cell;
             Bind(cell);
+            _materialOverrides = new MaterialPropertyBlock();
+            _materialOverrides.SetTexture(MainTex, terrainVariant.TextureOverride);
+            _renderer.SetPropertyBlock(_materialOverrides);
         }
 
         private void Bind(IGridCell cell)

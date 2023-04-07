@@ -3,31 +3,24 @@ using UnityEngine;
 
 namespace Runtime.Grid.Services
 {
-    public sealed class GridRaycaster : IGridRaycaster
+    public static class GridRaycaster 
     {
-        private Camera _mainCamera;
-
-        public Ray GetRayFromMousePosition(Vector2 mousePosition)
+        public static Ray GetRayFromMousePosition(Camera mainCamera, Vector2 mousePosition)
         {
-            if (!_mainCamera)
-            {
-                _mainCamera = Camera.main;
-            }
-
-            if (!_mainCamera)
+            if (!mainCamera)
             {
                 throw new NullReferenceException("No main camera");
             }
 
-            var cameraPosition = _mainCamera.transform.position;
+            var cameraPosition = mainCamera.transform.position;
 
-            var cursor = _mainCamera.ScreenToWorldPoint(new Vector3(mousePosition.x, mousePosition.y,
-                _mainCamera.nearClipPlane));
+            var cursor = mainCamera.ScreenToWorldPoint(new Vector3(mousePosition.x, mousePosition.y,
+                mainCamera.nearClipPlane));
             var direction = cursor - cameraPosition;
             return new Ray(cameraPosition, direction);
         }
 
-        public bool TryGetHitOnGrid(Ray ray, out Vector3 hitPoint)
+        public static bool TryGetHitOnGrid(Ray ray, out Vector3 hitPoint)
         {
             hitPoint = Vector3.zero;
 

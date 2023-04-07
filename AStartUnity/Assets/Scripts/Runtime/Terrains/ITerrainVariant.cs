@@ -1,4 +1,6 @@
-﻿namespace Runtime.Terrains
+﻿using UnityEngine;
+
+namespace Runtime.Terrains
 {
     public enum TerrainType
     {
@@ -17,5 +19,6 @@
         bool IsWalkable { get; }
         
         TerrainType Type { get; }
+        Texture TextureOverride { get; }
     }
 }

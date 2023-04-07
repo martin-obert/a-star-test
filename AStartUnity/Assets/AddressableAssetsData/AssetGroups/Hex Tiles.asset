@@ -17,36 +17,46 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 9dfa9f7ff412bed4baa0e145cb789d62
   m_SerializeEntries:
-  - m_GUID: c50de60d7dc10114d91ee2b33df0b2fa
-    m_Address: Desert Grid Cell Variant
+  - m_GUID: 44953279cb172e248a7c2207248727b0
+    m_Address: Assets/Art/Materials/mat_mainTile.mat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
+  - m_GUID: 64004f801405f3545abc5b616d593a21
+    m_Address: Assets/ScriptableObjects/TerrainVariant - Grass.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - preload
     - grid_cell_variant
-  - m_GUID: 3ffb3eb745779574eb71220ed3c9b72b
-    m_Address: Water Grid Cell Variant
+  - m_GUID: 2fa35c7dfc43f9d4799c70aaac53d8f4
+    m_Address: Assets/ScriptableObjects/TerrainVariant - Forest.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - preload
     - grid_cell_variant
-  - m_GUID: e5c023690957eaf4196eb41789c49fd7
-    m_Address: Grass Grid Cell Variant
+  - m_GUID: afb5468ecef436643a1d9fa4892069ed
+    m_Address: Assets/ScriptableObjects/TerrainVariant - Desert.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - preload
     - grid_cell_variant
-  - m_GUID: 4a000f9c6ea68d8459f7340a71b6f2ad
-    m_Address: Forest Grid Cell Variant
+  - m_GUID: 48d1649988eef934a80713f9c86f652f
+    m_Address: Assets/ScriptableObjects/TerrainVariant - Mountain.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - preload
     - grid_cell_variant
-  - m_GUID: de753c78bf663aa40b106a5ffd4e26b6
-    m_Address: Mountain Grid Cell Variant
+  - m_GUID: 371d2481c72baf844ba81802c418b529
+    m_Address: Assets/ScriptableObjects/TerrainVariant - Water.asset
     m_ReadOnly: 0
     m_SerializedLabels:
     - preload
     - grid_cell_variant
+  - m_GUID: 29136d98fc724aa4d9666c00e2aeab07
+    m_Address: Assets/Art/Prefabs/Hexagon_Model.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - preload
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: dbed9c6d90e0d7842beefa1e1c08d92a, type: 2}
   m_SchemaSet:

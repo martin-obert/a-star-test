@@ -22,7 +22,7 @@ namespace Runtime.Ui
 
         private void Start()
         {
-           var eventSubscriber = UnitOfWork.Instance.EventSubscriber;
+           var eventSubscriber = Grid.Services.ServiceInjector.Instance.EventSubscriber;
 
             eventSubscriber.OnGamePreloadingInfo()
                 .ObserveOnMainThread()

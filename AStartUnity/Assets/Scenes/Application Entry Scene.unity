@@ -1536,13 +1536,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d04b7692a9474134bd63c57d0c762dac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  preloadLabel:
-    m_LabelString: preload
-  worldToLoad:
-    m_AssetGUID: fb641e4ae1d1fe94fb436c89bf07ed7a
-    m_SubObjectName: 
-    m_SubObjectType: 
-    m_EditorAssetChanged: 0
 --- !u!4 &952360051
 Transform:
   m_ObjectHideFlags: 0
@@ -2823,7 +2816,7 @@ GameObject:
   - component: {fileID: 1505386908}
   - component: {fileID: 1505386907}
   m_Layer: 0
-  m_Name: Unit Of Work
+  m_Name: Service Injector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2841,7 +2834,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96e6fe9a4c31414e9a6b0e5d74c851fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridCellRepository: {fileID: 11400000, guid: 032d4be40dfe44a4594140af12848435, type: 2}
+  gameDefinitions:
+    hexGridScene:
+      m_AssetGUID: fb641e4ae1d1fe94fb436c89bf07ed7a
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+    preloadLabel:
+      m_LabelString: preload
+    hexTile:
+      m_AssetGUID: 29136d98fc724aa4d9666c00e2aeab07
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_EditorAssetChanged: 0
+    terrainVariantsLabel:
+      m_LabelString: grid_cell_variant
+  terrainVariants:
+  - {fileID: 11400000, guid: afb5468ecef436643a1d9fa4892069ed, type: 2}
+  - {fileID: 11400000, guid: 2fa35c7dfc43f9d4799c70aaac53d8f4, type: 2}
+  - {fileID: 11400000, guid: 64004f801405f3545abc5b616d593a21, type: 2}
+  - {fileID: 11400000, guid: 48d1649988eef934a80713f9c86f652f, type: 2}
+  - {fileID: 11400000, guid: 371d2481c72baf844ba81802c418b529, type: 2}
 --- !u!4 &1505386908
 Transform:
   m_ObjectHideFlags: 0

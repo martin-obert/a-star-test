@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Runtime.Definitions;
 using Runtime.Grid.Data;
 using Runtime.Grid.Services;
@@ -8,9 +9,10 @@ namespace Runtime.Grid.Mappers
 {
     public static class GridCellMapper
     {
-        public static IGridCell GridCellFromSave(GridCellSave value, ITerrainVariant terrainVariant)
+        public static IGridCell GridCellFromSave(GridCellSave value, IEnumerable<ITerrainVariant> terrainVariants)
         {
-            return GridCellFactory.Create(value.RowIndex, value.ColIndex, terrainVariant);
+            return GridCellFactory.Create(value.RowIndex, value.ColIndex,
+                terrainVariants.First(x => x.Type == value.TerrainType));
         }
 
         public static GridCellSave ToGridCellSave(IGridCell value)
