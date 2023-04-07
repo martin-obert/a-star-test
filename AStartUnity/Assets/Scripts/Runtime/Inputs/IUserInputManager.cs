@@ -7,6 +7,6 @@ namespace Runtime.Inputs
     {
         event EventHandler SelectCell;
         Vector2 MousePosition { get; }
-        Vector3 AxisMovement { get; }
+        Vector3 AxisMovementVector { get; }
     }
 }

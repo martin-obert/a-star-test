@@ -21,6 +21,7 @@ namespace Runtime.Grid.Data
         public float HeightHalf { get; }
         public float WidthHalf { get; }
         void SetNeighbours(IEnumerable<IGridCell> neighbours);
-        ITerrainVariant TerrainVariant { get; }
+        bool IsWalkable { get; }
+        TerrainType TerrainType { get; }
     }
 }

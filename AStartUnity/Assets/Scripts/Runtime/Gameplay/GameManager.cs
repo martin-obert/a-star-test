@@ -15,25 +15,17 @@ namespace Runtime.Gameplay
     {
         [SerializeField] private AssetLabelReference preloadLabel;
         [SerializeField] private AssetReference worldToLoad;
-        
-        public GridSetup GridSetup { get; set; }
 
-        public static IGameManager Instance { get; private set; }
+        private EventPublisher _eventPublisher;
+
         private void Awake()
         {
-            if (Instance != null)
-            {
-                if (!ReferenceEquals(Instance, this))
-                    Destroy(this);
-                return;
-            }
-
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            UnitOfWork.Instance.RegisterService<IGameManager>(this);
         }
 
         private void Start()
         {
+            _eventPublisher = UnitOfWork.Instance.EventPublisher;
             PreDownloadAssets();
         }
 
@@ -51,7 +43,7 @@ namespace Runtime.Gameplay
                 catch (Exception e)
                 {
                     Debug.LogException(e);
-                    EventPublisher.OnGameFatalError("Failed to initialize game");
+                    _eventPublisher.OnGameFatalError("Failed to initialize game");
                 }
             });
         }
@@ -60,34 +52,34 @@ namespace Runtime.Gameplay
         {
             if (!Application.isEditor) return;
 
-            EventPublisher.OnGamePreloadingInfo("Clearing addressable cache");
+            _eventPublisher.OnGamePreloadingInfo("Clearing addressable cache");
             
             await Addressables.ClearDependencyCacheAsync(preloadLabel, true)
                 .WithCancellation(cancellationToken);
 
-            EventPublisher.OnGamePreloadingInfo("Cache cleared");
+            _eventPublisher.OnGamePreloadingInfo("Cache cleared");
         }
 
         private async UniTask PreloadDependenciesAsync(CancellationToken cancellationToken)
         {
-            EventPublisher.OnGamePreloadingInfo("Checking preload dependencies");
+            _eventPublisher.OnGamePreloadingInfo("Checking preload dependencies");
 
             var downloadSize = await Addressables.GetDownloadSizeAsync(preloadLabel)
                 .WithCancellation(cancellationToken);
 
             if (downloadSize > 0)
             {
-                EventPublisher.OnGamePreloadingInfo($"Need to download: {downloadSize} bytes");
+                _eventPublisher.OnGamePreloadingInfo($"Need to download: {downloadSize} bytes");
 
                 await Addressables.DownloadDependenciesAsync(preloadLabel)
                     .WithCancellation(cancellationToken);
             }
             else
             {
-                EventPublisher.OnGamePreloadingInfo("Nothing needed to download");
+                _eventPublisher.OnGamePreloadingInfo("Nothing needed to download");
             }
             
-            EventPublisher.OnPreloadComplete();
+            _eventPublisher.OnPreloadComplete();
         }
 
         public async UniTask LoadHexWorldAsync(CancellationToken cancellationToken)

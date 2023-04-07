@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Runtime.Definitions;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
 using Runtime.Terrains;
@@ -23,26 +22,22 @@ namespace Runtime.Grid
                 Parallel.For(0, colCount, col =>
                 {
                     var terrainVariant = terrainVariantRepository.GetRandomTerrainVariant();
-                    var gridCell = new GridCell
-                    {
-                        RowIndex = row,
-                        ColIndex = col,
-                        WorldPosition = GridCellHelpers.ToWorldCoords(row, col),
-                        HeightHalf = GridDefinitions.HeightRadius,
-                        WidthHalf = GridDefinitions.WidthRadius,
-                        TerrainVariant = terrainVariant
-                    };
-                    result[row * colCount + col] = gridCell;
+                    result[row * colCount + col] = GridCellFactory.Create(row, col, terrainVariant);
                 });
             });
 
-            Parallel.ForEach(result, gridCell =>
+           
+            return result;
+        }
+
+        public static void PopulateNeighbours(IGridCell[] grid)
+        {
+            Parallel.ForEach(grid, gridCell =>
             {
-                var neighbours = CollectNeighbours(gridCell, result);
+                var neighbours = GridGenerator.CollectNeighbours(gridCell, grid);
                 gridCell.SetNeighbours(neighbours);
             });
 
-            return result;
         }
 
         public static IEnumerable<IGridCell> CollectNeighbours(IGridCell currentCell, IGridCell[] grid)

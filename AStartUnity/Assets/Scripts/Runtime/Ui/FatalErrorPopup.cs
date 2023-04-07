@@ -1,4 +1,5 @@
 ﻿using System;
+using Runtime.Grid.Services;
 using Runtime.Messaging;
 using Runtime.Messaging.Events;
 using TMPro;
@@ -13,16 +14,25 @@ namespace Runtime.Ui
         
         [SerializeField] private TMP_Text messageLabel;
 
+        private EventSubscriber _eventSubscriber;
+        
         private void Awake()
         {
-            EventSubscriber.OnGameFatalError()
+            _eventSubscriber = UnitOfWork.Instance.EventSubscriber;
+        }
+
+        private void Start()
+        {
+            _subHook?.Dispose();
+            
+            _eventSubscriber.OnGameFatalError()
                 .ObserveOnMainThread()
                 .Subscribe(x =>
-            {
-                gameObject.SetActive(true);
-                messageLabel.text = x.Message;
-            }).AddTo(this);
-            
+                {
+                    gameObject.SetActive(true);
+                    messageLabel.text = x.Message;
+                }).AddTo(this);
+
             gameObject.SetActive(false);
         }
 

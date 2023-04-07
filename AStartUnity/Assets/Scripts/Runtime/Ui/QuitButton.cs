@@ -6,6 +6,10 @@ namespace Runtime.Ui
     {
         public void TriggerQuit()
         {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+            return;
+#endif
             Application.Quit();
         }
     }

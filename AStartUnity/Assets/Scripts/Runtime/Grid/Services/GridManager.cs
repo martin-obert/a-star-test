@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Runtime.Gameplay;
 using Runtime.Grid.Data;
@@ -12,77 +14,57 @@ namespace Runtime.Grid.Services
 {
     public sealed class GridManager : MonoBehaviour, IGridManager, IDisposable
     {
-        private readonly PathfindingContext _pathfindingContext = new();
-        private readonly IGridRaycaster _gridRaycaster = new GridRaycaster();
-
-        private Rect _rect;
-
-        public IGridCell[] CurrentCells { get; private set; }
-        public IGridCell HoverCell { get; private set; }
-        public static IGridManager Instance { get; private set; }
-
-
         [SerializeField] private int rowCount = 1;
         [SerializeField] private int colCount = 1;
         [SerializeField] private bool autoGenerateGridOnStart;
-        [SerializeField] private GridCellRepository gridCellRepository;
+
+        private readonly PathfindingContext _pathfindingContext = new();
+
+        private IGridRaycaster _gridRaycaster;
+
+        private Rect _rect;
+
+        private IUserInputManager _userInputManager;
+        private EventPublisher _eventPublisher;
+
+        public IGridCell[] CurrentCells { get; private set; }
+        public IGridCell HoverCell { get; private set; }
+
+        public bool IsPointOnGrid(Vector2 point) => _rect.Contains(point);
+
+        public Vector2 Center => _rect.center;
 
         private void Awake()
         {
-            if (Instance != null && !ReferenceEquals(Instance, this))
-            {
-                Destroy(this);
-                return;
-            }
-
-            ReadGameManagerSetup();
-            Assert.IsNotNull(gridCellRepository, "gridCellRepository != null");
             Assert.IsTrue(rowCount > 0, "rowCount > 0");
             Assert.IsTrue(colCount > 0, "colCount > 0");
-            Debug.Log($"rows - {rowCount}, cols - {colCount}");
-            Instance = this;
+            UnitOfWork.Instance.RegisterService<IGridManager>(this);
         }
 
-        private void ReadGameManagerSetup()
-        {
-            if (GameManager.Instance is not { GridSetup: { } }) return;
-            rowCount = GameManager.Instance.GridSetup.RowCount;
-            colCount = GameManager.Instance.GridSetup.ColCount;
-            Debug.Log($"Reading game manager grid setup");
-        }
 
         private void Start()
         {
+            _gridRaycaster = UnitOfWork.Instance.GridRaycaster;
+            _userInputManager = UnitOfWork.Instance.UserInputManager;
+            _eventPublisher = UnitOfWork.Instance.EventPublisher;
+
+            ReadGameManagerSetup();
+
+            Debug.Log($"rows - {rowCount}, cols - {colCount}");
+
             UniTask.Void(async () =>
             {
                 await UniTask.SwitchToMainThread();
+                await UnitOfWork.Instance.GridCellRepository.InitAsync();
 
-                await gridCellRepository.InitAsync();
                 if (autoGenerateGridOnStart)
                 {
                     GenerateGrid();
                 }
             });
-            UserInputManager.Instance.SelectCell += InstanceOnSelectCell;
+            _userInputManager.SelectCell += InstanceOnSelectCell;
         }
 
-        private void InstanceOnSelectCell(object sender, EventArgs e)
-        {
-            var gridCell = HoverCell;
-
-            if (gridCell == null || !gridCell.TerrainVariant.IsWalkable) return;
-
-            gridCell.ToggleSelected();
-
-            if (gridCell.IsSelected)
-            {
-                _pathfindingContext.AddWaypoint(gridCell);
-            }
-            else
-            {
-                _pathfindingContext.RemoveWaypoint();
-            }
-        }
 
         private void OnDestroy()
         {
@@ -94,7 +76,7 @@ namespace Runtime.Grid.Services
         {
             if (CurrentCells == null) return;
 
-            var ray = _gridRaycaster.GetRayFromMousePosition(UserInputManager.Instance.MousePosition);
+            var ray = _gridRaycaster.GetRayFromMousePosition(_userInputManager.MousePosition);
 
             if (!_gridRaycaster.TryGetHitOnGrid(ray, out var hitPoint)) return;
 
@@ -116,29 +98,65 @@ namespace Runtime.Grid.Services
         }
 
 
+        private void ReadGameManagerSetup()
+        {
+            var context = UnitOfWork.Instance.SceneContextManager.GetContext();
+            rowCount = context.RowCount;
+            colCount = context.ColCount;
+            CurrentCells = context.Cells;
+            Debug.Log($"Reading game manager grid setup");
+        }
+
+        private void InstanceOnSelectCell(object sender, EventArgs e)
+        {
+            var gridCell = HoverCell;
+
+            if (gridCell is not { IsWalkable: true }) return;
+
+            gridCell.ToggleSelected();
+
+            if (gridCell.IsSelected)
+            {
+                _pathfindingContext.AddWaypoint(gridCell);
+            }
+            else
+            {
+                _pathfindingContext.RemoveWaypoint();
+            }
+        }
+
+
         public void GenerateGrid()
         {
-            CurrentCells = GridGenerator.GenerateGrid(rowCount, colCount, gridCellRepository);
+            CurrentCells ??= GridGenerator.GenerateGrid(rowCount, colCount, UnitOfWork.Instance.TerrainVariantRepository);
 
+            GridGenerator.PopulateNeighbours(CurrentCells);
+            
             foreach (var gridCell in CurrentCells)
             {
-                gridCellRepository.GetPrefab(gridCell.TerrainVariant, transform).SetDataModel(gridCell);
+                UnitOfWork.Instance.GridCellRepository.GetPrefab(gridCell.TerrainType, transform)
+                    .SetDataModel(gridCell);
             }
 
             var minCell = GridCellHelpers.GetCellByCoords(CurrentCells, 0, 0);
             var maxCell = GridCellHelpers.GetCellByCoords(CurrentCells, rowCount - 1, colCount - 1);
+
             _rect = Rect.MinMaxRect(minCell.WorldPosition.x, minCell.WorldPosition.z, maxCell.WorldPosition.x,
                 maxCell.WorldPosition.z);
 
-            EventPublisher.OnGridInstantiated();
+            _eventPublisher.OnGridInstantiated();
         }
 
-        public bool IsPointOnGrid(Vector2 point) => _rect.Contains(point);
-        public Vector2 Center => _rect.center;
+        public UniTask SaveLayoutAsync(CancellationToken token = default) =>
+            UnitOfWork.Instance.GridLayoutRepository.SaveAsync(CurrentCells, token);
 
         public void Dispose()
         {
-            UserInputManager.Instance.SelectCell -= InstanceOnSelectCell;
+            if (UnitOfWork.Instance)
+                UnitOfWork.Instance.RemoveService<IGridManager>();
+
+            _userInputManager.SelectCell -= InstanceOnSelectCell;
+
             _pathfindingContext?.Dispose();
         }
     }

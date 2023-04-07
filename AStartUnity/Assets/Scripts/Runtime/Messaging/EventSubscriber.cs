@@ -4,21 +4,24 @@ using UniRx;
 
 namespace Runtime.Messaging
 {
-    public static class EventSubscriber
+    public class EventSubscriber
     {
-        public static IObservable<GameFatalError> OnGameFatalError()
+        public IObservable<GameFatalError> OnGameFatalError()
         {
             return MessageBroker.Default.Receive<GameFatalError>();
         }
-        public static IObservable<GamePreloadingInfo> OnGamePreloadingInfo()
+
+        public IObservable<GamePreloadingInfo> OnGamePreloadingInfo()
         {
             return MessageBroker.Default.Receive<GamePreloadingInfo>();
         }
-        public static IObservable<GridInstantiated> OnGridInstantiated()
+
+        public IObservable<GridInstantiated> OnGridInstantiated()
         {
             return MessageBroker.Default.Receive<GridInstantiated>();
         }
-        public static IObservable<PreloadComplete> OnPreloadComplete()
+
+        public IObservable<PreloadComplete> OnPreloadComplete()
         {
             return MessageBroker.Default.Receive<PreloadComplete>();
         }

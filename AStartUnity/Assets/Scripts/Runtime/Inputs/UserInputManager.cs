@@ -1,4 +1,5 @@
 ﻿using System;
+using Runtime.Grid.Services;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -6,28 +7,14 @@ namespace Runtime.Inputs
 {
     internal sealed class UserInputManager : MonoBehaviour, IUserInputManager
     {
-
-        public static IUserInputManager Instance { get; private set; }
-
         public event EventHandler SelectCell;
         public Vector2 MousePosition => Input.mousePosition;
-        public Vector3 AxisMovement => new(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+        public Vector3 AxisMovementVector => new(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 
 
         private void Awake()
         {
-            if (Instance != null && !ReferenceEquals(Instance, this))
-            {
-                Destroy(this);
-                return;
-            }
-
-            Instance = this;
-        }
-
-        private void OnSelectCell()
-        {
-            SelectCell?.Invoke(this, EventArgs.Empty);
+            UnitOfWork.Instance.RegisterService<IUserInputManager>(this);
         }
 
         private void Update()
@@ -36,6 +23,17 @@ namespace Runtime.Inputs
             {
                 OnSelectCell();
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (UnitOfWork.Instance)
+                UnitOfWork.Instance.RemoveService<IUserInputManager>();
+        }
+        
+        private void OnSelectCell()
+        {
+            SelectCell?.Invoke(this, EventArgs.Empty);
         }
     }
 }

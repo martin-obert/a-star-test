@@ -1,4 +1,6 @@
-﻿using Runtime.Messaging;
+﻿using System;
+using Runtime.Grid.Services;
+using Runtime.Messaging;
 using Runtime.Messaging.Events;
 using TMPro;
 using UniRx;
@@ -10,24 +12,30 @@ namespace Runtime.Ui
     public sealed class LoadingOverlay : MonoBehaviour
     {
         [SerializeField] private TMP_Text infoLabel;
+        
         private readonly CompositeDisposable _disposable = new();
-
+        
         private void Awake()
         {
             Assert.IsNotNull(infoLabel, "infoLabel != null");
-            
-            EventSubscriber.OnGamePreloadingInfo()
+        }
+
+        private void Start()
+        {
+           var eventSubscriber = UnitOfWork.Instance.EventSubscriber;
+
+            eventSubscriber.OnGamePreloadingInfo()
                 .ObserveOnMainThread()
                 .Subscribe(x => infoLabel.text = x.Message)
                 .AddTo(_disposable);
             
-            EventSubscriber.OnPreloadComplete()
+            eventSubscriber.OnPreloadComplete()
                 .ObserveOnMainThread()
                 .Subscribe(x => gameObject.SetActive(false))
                 .AddTo(_disposable);
         }
 
-        private void OnDisable()
+        private void OnDestroy()
         {
             _disposable?.Dispose();
         }

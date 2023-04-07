@@ -38,10 +38,10 @@ namespace Runtime.Grid.Presenters
             _isInitializing = false;
         }
 
-        public GridCellPresenter GetPrefab(ITerrainVariant terrainVariant, Transform parent)
+        public GridCellPresenter GetPrefab(TerrainType terrainType, Transform parent)
         {
             ThrowIfInitializingOrNotInitialized();
-            var presenterPrefab = _prefabs.FirstOrDefault(x => x.TerrainVariant == terrainVariant);
+            var presenterPrefab = _prefabs.FirstOrDefault(x => x.TerrainVariant.Type == terrainType);
             return Instantiate(presenterPrefab, parent);
         }
 
@@ -53,10 +53,16 @@ namespace Runtime.Grid.Presenters
             return _prefabs[range].TerrainVariant;
         }
 
+        public ITerrainVariant GetTerrainVariant(TerrainType argTerrainType)
+        {
+            ThrowIfInitializingOrNotInitialized();
+            return _prefabs.FirstOrDefault(x => x.TerrainVariant.Type == argTerrainType)?.TerrainVariant;
+        }
+
         private void ThrowIfInitializingOrNotInitialized()
         {
-            if (!_isInitialized) throw new Exception($"{name} - not yet initialized: call {nameof(InitAsync)}() method and wait for result");
-            if (_isInitializing) throw new Exception($"{name} - is still initializing wait for result");
+            if (!_isInitialized) throw new Exception($"{nameof(GridCellRepository)} - not yet initialized: call {nameof(InitAsync)}() method and wait for result");
+            if (_isInitializing) throw new Exception($"{nameof(GridCellRepository)} - is still initializing wait for result");
         }
 
         private void OnDisable()

@@ -93,6 +93,9 @@ namespace Runtime.Grid.Data
             Neighbours = neighbours;
         }
 
+        public bool IsWalkable { get; set; }
+        public TerrainType TerrainType { get; set; }
+
         public IEnumerable<IAStarNode> Neighbours { get; private set; }
         public ITerrainVariant TerrainVariant { get; set; }
 
@@ -111,7 +114,7 @@ namespace Runtime.Grid.Data
         public float EstimatedCostTo(IAStarNode target)
         {
             if (target is not IGridCell gridCell) throw new Exception("Must be a grid cell for pathfinding est.");
-            if (!gridCell.TerrainVariant.IsWalkable)
+            if (!gridCell.IsWalkable)
                 return float.MaxValue;
             
             return Math.Abs((gridCell.WorldPosition - WorldPosition).magnitude);

@@ -3,24 +3,24 @@ using UniRx;
 
 namespace Runtime.Messaging
 {
-    public static class EventPublisher
+    public class EventPublisher
     {
-        public static void OnGameFatalError(string message)
+        public void OnGameFatalError(string message)
         {
             MessageBroker.Default.Publish(new GameFatalError(message));
         }
 
-        public static void OnGamePreloadingInfo(string message)
+        public void OnGamePreloadingInfo(string message)
         {
             MessageBroker.Default.Publish(new GamePreloadingInfo(message));
         }
 
-        public static void OnGridInstantiated()
+        public void OnGridInstantiated()
         {
             MessageBroker.Default.Publish(new GridInstantiated());
         }
 
-        public static void OnPreloadComplete()
+        public void OnPreloadComplete()
         {
             MessageBroker.Default.Publish(new PreloadComplete());
         }

@@ -1,4 +1,5 @@
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using NUnit.Framework;
 using Runtime.Grid;
 using Runtime.Terrains;
@@ -13,6 +14,7 @@ namespace Tests
             public Texture2D MainTex { get; }
             public int DaysTravelCost => 1;
             public bool IsWalkable { get; }
+            public TerrainType Type { get; }
         }
         
         private sealed class TerrainVariantRepositoryMock : ITerrainVariantRepository
@@ -20,6 +22,16 @@ namespace Tests
             public ITerrainVariant GetRandomTerrainVariant()
             {
                 return new TerrainVariantMock();
+            }
+
+            public ITerrainVariant GetTerrainVariant(TerrainType argTerrainType)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public UniTask InitAsync()
+            {
+                throw new System.NotImplementedException();
             }
         }
         
