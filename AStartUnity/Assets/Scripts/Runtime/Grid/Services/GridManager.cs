@@ -48,15 +48,18 @@ namespace Runtime.Grid.Services
                     await UniTask.SwitchToMainThread();
 
                     var context = ServiceInjector.Instance.SceneContextManager.GetContext();
-
-                    if (context.IsValid())
+                    if (context == null)
+                    {
+                        _gridService.GenerateGrid(rowCount, colCount, prefab, terrainVariants);
+                    }
+                    else if (context.HasCells())
                     {
                         _gridService.SetCells(context.RowCount, context.ColCount, context.Cells, prefab,
                             terrainVariants);
                     }
                     else if (autoGenerateGridOnStart)
                     {
-                        _gridService.GenerateGrid(rowCount, colCount, prefab, terrainVariants);
+                        _gridService.GenerateGrid(context.RowCount, context.ColCount, prefab, terrainVariants);
                     }
 
                     ServiceInjector.Instance.EventPublisher.OnGridInstantiated();

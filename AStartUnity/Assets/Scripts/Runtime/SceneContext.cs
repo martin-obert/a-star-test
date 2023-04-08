@@ -9,9 +9,9 @@ namespace Runtime
         public int ColCount { get; set; }
         public IGridCell[] Cells { get; set; }
 
-        public bool IsValid()
+        public bool HasCells()
         {
-            return RowCount > 0 && ColCount > 0 && Cells != null && Cells.Any();
+            return Cells != null && Cells.Any();
         }
     }
 }

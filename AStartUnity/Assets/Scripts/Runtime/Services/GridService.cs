@@ -29,6 +29,7 @@ namespace Runtime.Services
         {
             var path = Path.Combine(Application.persistentDataPath, "Saves");
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            Debug.Log(path);
             return path;
         }
 
