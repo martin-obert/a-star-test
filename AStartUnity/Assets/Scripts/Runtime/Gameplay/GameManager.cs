@@ -30,7 +30,7 @@ namespace Runtime.Gameplay
                         await addressableManager.ClearDependencyCacheAsync(token);
                     }
 
-                        await addressableManager.DownloadDependenciesAsync(token);
+                    await addressableManager.DownloadDependenciesAsync(token);
 
                     ServiceInjector.Instance.EventPublisher.OnPreloadComplete();
                 }
@@ -38,7 +38,6 @@ namespace Runtime.Gameplay
                 {
                     Console.WriteLine(e);
                     throw;
-                    
                 }
             });
         }

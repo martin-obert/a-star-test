@@ -39,26 +39,33 @@ namespace Runtime.Grid.Services
 
             UniTask.Void(async () =>
             {
-                
-                var addressableManager = ServiceInjector.Instance.AddressableManager;
-                
-                var prefab = addressableManager.GetCellPrefab();
-                var terrainVariants = addressableManager.GetTerrainVariants();
-                await UniTask.SwitchToMainThread();
-                if (autoGenerateGridOnStart)
+                try
                 {
-                    _gridService.GenerateGrid(rowCount, colCount, prefab, terrainVariants);
-                    return;
+                    var addressableManager = ServiceInjector.Instance.AddressableManager;
+
+                    var prefab = addressableManager.GetCellPrefab();
+                    var terrainVariants = addressableManager.GetTerrainVariants();
+                    await UniTask.SwitchToMainThread();
+
+                    var context = ServiceInjector.Instance.SceneContextManager.GetContext();
+
+                    if (context.IsValid())
+                    {
+                        _gridService.SetCells(context.RowCount, context.ColCount, context.Cells, prefab,
+                            terrainVariants);
+                    }
+                    else if (autoGenerateGridOnStart)
+                    {
+                        _gridService.GenerateGrid(rowCount, colCount, prefab, terrainVariants);
+                    }
+
+                    ServiceInjector.Instance.EventPublisher.OnGridInstantiated();
                 }
-
-                var context = ServiceInjector.Instance.SceneContextManager.GetContext();
-
-                if (context != null)
+                catch (Exception e)
                 {
-                    _gridService.SetCells(context.RowCount, context.ColCount, context.Cells, prefab, terrainVariants);
+                    Console.WriteLine(e);
+                    throw;
                 }
-                
-                ServiceInjector.Instance.EventPublisher.OnGridInstantiated();
             });
         }
 
