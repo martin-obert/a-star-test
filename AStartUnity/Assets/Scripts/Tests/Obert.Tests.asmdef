@@ -6,7 +6,8 @@
         "UnityEditor.TestRunner",
         "Obert.AStar",
         "SF.Pathfinding",
-        "UniTask"
+        "UniTask",
+        "UniRx"
     ],
     "includePlatforms": [
         "Editor"

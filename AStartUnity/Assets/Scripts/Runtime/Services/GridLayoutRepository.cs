@@ -13,16 +13,6 @@ using UnityEngine;
 
 namespace Runtime.Services
 {
-    public interface IGridLayoutRepository
-    {
-        string[] ListSaves();
-
-        UniTask<IGridCell[]> LoadAsync(string filename, ITerrainVariant[] terrainVariants,
-            CancellationToken token = default);
-
-        UniTask SaveAsync(IEnumerable<IGridCell> cells, CancellationToken token = default);
-    }
-
     public sealed class GridLayoutRepository : IGridLayoutRepository
     {
         private static string GetFilepath()

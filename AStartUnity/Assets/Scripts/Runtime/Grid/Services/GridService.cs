@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using System.Threading;
-using Cysharp.Threading.Tasks;
+using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 using Runtime.Gameplay;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
@@ -10,13 +11,17 @@ using Runtime.Inputs;
 using Runtime.Terrains;
 using UniRx;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using Random = System.Random;
+
+[assembly: InternalsVisibleTo("Grid.Editor.Tests")]
 
 namespace Runtime.Grid.Services
 {
     internal sealed class GridService : IGridService, IDisposable
     {
         private IGridCell _hoverCell;
+        private readonly Random _random = new();
+        private readonly IPrefabInstantiator _prefabInstantiator;
 
         public Rect Bounds { get; private set; }
 
@@ -30,30 +35,27 @@ namespace Runtime.Grid.Services
         private readonly PathfindingContext _pathfindingContext = new();
         private IGridCell[] _currentCells;
 
-        public GridService(IObservable<Unit> onSelectCell)
+        public GridService(IPrefabInstantiator prefabInstantiator)
         {
-            onSelectCell.Subscribe(_ =>
-            {
-                var gridCell = _hoverCell;
-
-                if (gridCell is not { IsWalkable: true }) return;
-
-                gridCell.ToggleSelected();
-
-                if (gridCell.IsSelected)
-                {
-                    _pathfindingContext.AddWaypoint(gridCell);
-                }
-                else
-                {
-                    _pathfindingContext.RemoveWaypoint();
-                }
-            }).AddTo(_disposable);
+            _prefabInstantiator = prefabInstantiator ?? throw new ArgumentNullException(nameof(prefabInstantiator));
         }
 
-        public UniTask SaveLayoutAsync(CancellationToken token = default)
+        public void SelectHoveredCell()
         {
-            throw new System.NotImplementedException();
+            var gridCell = _hoverCell;
+
+            if (gridCell is not { IsWalkable: true }) return;
+
+            gridCell.ToggleSelected();
+
+            if (gridCell.IsSelected)
+            {
+                _pathfindingContext.AddWaypoint(gridCell);
+            }
+            else
+            {
+                _pathfindingContext.RemoveWaypoint();
+            }
         }
 
         public void Dispose()
@@ -62,13 +64,11 @@ namespace Runtime.Grid.Services
             _pathfindingContext?.Dispose();
         }
 
-        public void GenerateGrid(int rowCount, int colCount, GridCellPresenter prefab,
-            ITerrainVariant[] terrainVariants)
+        public void CreateNewGrid(int rowCount, int colCount, ITerrainVariant[] terrainVariants)
         {
-            var cells = GridGenerator.GenerateGrid(rowCount, colCount,
-                ServiceInjector.Instance.AddressableManager.GetRandomTerrainVariant);
+            var cells = GridGenerator.GenerateGrid(rowCount, colCount, () => GetRandomTerrainVariant(terrainVariants));
 
-            SetCells(rowCount, colCount, cells, prefab, terrainVariants);
+            InstantiateGrid(rowCount, colCount, cells);
         }
 
         public void SetBounds(int rowCount, int colCount)
@@ -80,11 +80,11 @@ namespace Runtime.Grid.Services
                 maxCell.WorldPosition.z);
         }
 
-        public void UpdateHoveringCell(IUserInputService userInputService)
+        public void UpdateHoveringCell(Camera mainCamera, IUserInputService userInputService)
         {
             if (_currentCells == null) return;
 
-            var ray = GridRaycaster.GetRayFromMousePosition(Camera.main, userInputService.MousePosition);
+            var ray = GridRaycaster.GetRayFromMousePosition(mainCamera, userInputService.MousePosition);
 
             if (!GridRaycaster.TryGetHitOnGrid(ray, out var hitPoint)) return;
 
@@ -105,19 +105,23 @@ namespace Runtime.Grid.Services
             }
         }
 
-        public void SetCells(int rowCount, int colCount, IGridCell[] cells, GridCellPresenter prefab,
-            ITerrainVariant[] terrainVariants)
+        public void InstantiateGrid(int rowCount, int colCount, IGridCell[] cells)
         {
             _currentCells = cells;
+
             GridGenerator.PopulateNeighbours(_currentCells);
 
             foreach (var gridCell in _currentCells)
             {
-                Object.Instantiate(prefab)
-                    .SetDataModel(gridCell, terrainVariants.First(x => x.Type == gridCell.TerrainType));
+                _prefabInstantiator.InstantiateGridCellPresenter(gridCell);
             }
 
             SetBounds(rowCount, colCount);
+        }
+
+        private ITerrainVariant GetRandomTerrainVariant(ITerrainVariant[] source)
+        {
+            return source[_random.Next(0, source.Length)];
         }
     }
 }

@@ -7,7 +7,7 @@ using UnityEngine.Assertions;
 namespace Runtime.Grid.Presenters
 {
     [RequireComponent(typeof(Renderer))]
-    public sealed class GridCellPresenter : MonoBehaviour
+    public class GridCellPresenter : MonoBehaviour
     {
         private IGridCell _cell;
         private MaterialPropertyBlock _materialOverrides;

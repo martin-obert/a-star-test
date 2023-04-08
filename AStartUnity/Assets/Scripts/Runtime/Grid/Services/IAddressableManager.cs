@@ -10,10 +10,11 @@ namespace Runtime.Grid.Services
     {
         UniTask ClearDependencyCacheAsync(CancellationToken token = default);
         UniTask DownloadDependenciesAsync(CancellationToken token = default);
-        UniTask<long> GetDownloadSizeAsync(CancellationToken token = default);
         UniTask LoadSceneAsync(AssetReference world, CancellationToken token);
-        ITerrainVariant GetRandomTerrainVariant();
         ITerrainVariant[] GetTerrainVariants();
         GridCellPresenter GetCellPrefab();
+
+        ITerrainVariant GetTerrainVariantByType(TerrainType terrainType);
+
     }
 }

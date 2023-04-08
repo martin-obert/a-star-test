@@ -1,6 +1,8 @@
 ﻿using System;
 using Cysharp.Threading.Tasks;
 using Runtime.Inputs;
+using Runtime.Messaging;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -10,6 +12,38 @@ namespace Runtime.Grid.Services
     {
         public static T GetService<T>(this IServiceProvider source) => (T)source.GetService(typeof(T));
     }
+
+    public static class UseCases
+    {
+        public static async UniTask GridInitialization(
+            SceneContext context,
+            IGridService gridService,
+            IAddressableManager addressableManager,
+            EventPublisher eventPublisher)
+        {
+            try
+            {
+                await UniTask.SwitchToMainThread();
+                var terrainVariants = addressableManager.GetTerrainVariants();
+                if (!context.HasCells())
+                {
+                    gridService.CreateNewGrid(context.RowCount, context.ColCount, terrainVariants);
+                }
+                else if (context.HasCells())
+                {
+                    gridService.InstantiateGrid(context.RowCount, context.ColCount, context.Cells);
+                }
+
+                eventPublisher.OnGridInstantiated();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+    }
+
 
     public sealed class GridManager : MonoBehaviour, IDisposable
     {
@@ -21,54 +55,38 @@ namespace Runtime.Grid.Services
         private GridService _gridService;
         private IUserInputService _userInputService;
 
+        private Camera _mainCamera;
+
         private void Awake()
         {
             Assert.IsTrue(rowCount > 0, "rowCount > 0");
             Assert.IsTrue(colCount > 0, "colCount > 0");
+
+            _mainCamera = Camera.main;
+            Assert.IsNotNull(_mainCamera, "_mainCamera != null");
+
             _serviceRegistrationHook =
                 ServiceInjector.Instance.RegisterService<IGridService>(s =>
-                    _gridService = new GridService(s.GetService<IUserInputService>().SelectCell));
+                    _gridService = new GridService(s.GetService<IPrefabInstantiator>()));
         }
 
 
         private void Start()
         {
             _userInputService = ServiceInjector.Instance.UserInputService;
-
-            Debug.Log($"rows - {rowCount}, cols - {colCount}");
+            _userInputService.SelectCell.Subscribe(_ => _gridService.SelectHoveredCell()).AddTo(this);
 
             UniTask.Void(async () =>
             {
-                try
-                {
-                    var addressableManager = ServiceInjector.Instance.AddressableManager;
-
-                    var prefab = addressableManager.GetCellPrefab();
-                    var terrainVariants = addressableManager.GetTerrainVariants();
-                    await UniTask.SwitchToMainThread();
-
-                    var context = ServiceInjector.Instance.SceneContextManager.GetContext();
-                    if (context == null)
-                    {
-                        _gridService.GenerateGrid(rowCount, colCount, prefab, terrainVariants);
-                    }
-                    else if (context.HasCells())
-                    {
-                        _gridService.SetCells(context.RowCount, context.ColCount, context.Cells, prefab,
-                            terrainVariants);
-                    }
-                    else if (autoGenerateGridOnStart)
-                    {
-                        _gridService.GenerateGrid(context.RowCount, context.ColCount, prefab, terrainVariants);
-                    }
-
-                    ServiceInjector.Instance.EventPublisher.OnGridInstantiated();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    throw;
-                }
+                var contextManager = ServiceInjector.Instance.SceneContextManager;
+                var context = contextManager.GetContext();
+                
+                await UseCases.GridInitialization(
+                    context,
+                    _gridService,
+                    ServiceInjector.Instance.AddressableManager,
+                    ServiceInjector.Instance.EventPublisher
+                    );
             });
         }
 
@@ -79,7 +97,7 @@ namespace Runtime.Grid.Services
 
         private void Update()
         {
-            _gridService.UpdateHoveringCell(_userInputService);
+            _gridService.UpdateHoveringCell(_mainCamera, _userInputService);
         }
 
         public void Dispose()

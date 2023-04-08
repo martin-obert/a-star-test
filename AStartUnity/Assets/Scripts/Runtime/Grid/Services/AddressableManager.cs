@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -10,7 +9,6 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
-using Random = System.Random;
 
 namespace Runtime.Grid.Services
 {
@@ -20,7 +18,6 @@ namespace Runtime.Grid.Services
         private readonly ITerrainVariant[] _terrainVariants;
         private AsyncOperationHandle<GameObject> _handle;
         private GridCellPresenter _cell;
-        private readonly Random _random = new();
 
         public AddressableManager(GameDefinitions gameDefinitions, ITerrainVariant[] terrainVariants)
         {
@@ -56,11 +53,6 @@ namespace Runtime.Grid.Services
             await Addressables.LoadSceneAsync(world, LoadSceneMode.Additive).WithCancellation(token);
         }
 
-        public ITerrainVariant GetRandomTerrainVariant()
-        {
-            return _terrainVariants[_random.Next(0, _terrainVariants.Length)];
-        }
-
         public ITerrainVariant[] GetTerrainVariants()
         {
             return _terrainVariants;
@@ -69,6 +61,13 @@ namespace Runtime.Grid.Services
         public GridCellPresenter GetCellPrefab()
         {
             return _cell;
+        }
+
+        public ITerrainVariant GetTerrainVariantByType(TerrainType terrainType)
+        {
+            var source = GetTerrainVariants();
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            return source.FirstOrDefault(x => x.Type == terrainType);
         }
 
         public void Dispose()

@@ -39,7 +39,8 @@ namespace Runtime.Grid.Services
         public EventPublisher EventPublisher => GetService<EventPublisher>();
         public IAddressableManager AddressableManager => GetService<IAddressableManager>();
         public ISceneManagementService SceneManagementService => GetService<ISceneManagementService>();
-        public GameDefinitions GameDefinitions => GetService<GameDefinitions>();
+        public IPrefabInstantiator PrefabInstantiator => GetService<IPrefabInstantiator>();
+        
         public IGridLayoutRepository GridLayoutRepository => GetService<IGridLayoutRepository>();
         public EventSubscriber EventSubscriber => GetService<EventSubscriber>();
 
@@ -74,6 +75,7 @@ namespace Runtime.Grid.Services
             RegisterService(gameDefinitions);
 
             RegisterService(new EventSubscriber());
+            RegisterService(new PrefabInstantiator());
             RegisterService(new EventPublisher());
 
             RegisterService<IGridLayoutRepository>(new GridLayoutRepository());

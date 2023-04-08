@@ -19,9 +19,7 @@ namespace Runtime.Grid.Services
         EventPublisher EventPublisher { get; }
         IAddressableManager AddressableManager { get; }
         ISceneManagementService SceneManagementService { get; }
-        
-        GameDefinitions GameDefinitions { get; }
-
+        IPrefabInstantiator PrefabInstantiator { get; }
         IDisposable RegisterService<T>(T instance);
         IDisposable RegisterService<T>(Func<IServiceProvider, T> callback);
         
