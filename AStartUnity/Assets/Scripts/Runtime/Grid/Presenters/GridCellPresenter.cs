@@ -1,117 +1,161 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using Runtime.Grid.Data;
 using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace Runtime.Grid.Presenters
 {
-    [RequireComponent(typeof(Renderer))]
-    public sealed class GridCellPresenter : MonoBehaviour
+    public interface IGridCellGameObject
     {
-        [SerializeField] private Color hoverColor = Color.yellow;
-        [SerializeField] private Color selectionColor = Color.green;
+        string Name { get; set; }
+    }
 
-        private IGridCell _cell;
+    public sealed class GridCellGameObject : IGridCellGameObject
+    {
+        private readonly GameObject _gameObject;
 
-        private MaterialPropertyBlock _selectedState;
-        private MaterialPropertyBlock _hoverState;
-        private MaterialPropertyBlock _normalState;
-        private static readonly int BaseColorProp = Shader.PropertyToID("_Color");
+        public GridCellGameObject(GameObject gameObject)
+        {
+            _gameObject = gameObject;
+        }
+        public string Name
+        {
+            get => _gameObject.name;
+            set => _gameObject.name = value;
+        }
+    }
+
+    public interface IGridCellRenderer
+    {
+        void SetPropertyBlock(MaterialPropertyBlock materialPropertyBlock);
+    }
+
+    public interface IGridCellTransform
+    {
+        Vector3 Position { get; set; }
+    }
+
+    public sealed class GridCellTransform : IGridCellTransform
+    {
+        private readonly Transform _transform;
+
+        public GridCellTransform(Transform transform)
+        {
+            _transform = transform;
+        }
+        public Vector3 Position
+        {
+            get => _transform.position;
+            set => _transform.position = value;
+        }
+    }
+
+    public sealed class GridCellRenderer : IGridCellRenderer
+    {
+        private readonly Renderer _renderer;
+
+        public GridCellRenderer(Renderer renderer)
+        {
+            _renderer = renderer ? renderer : throw new ArgumentNullException(nameof(renderer));
+        }
+        public void SetPropertyBlock(MaterialPropertyBlock materialPropertyBlock)
+        {
+            _renderer.SetPropertyBlock(materialPropertyBlock);
+        }
+    }
+
+    public interface IGridCellPresenterController
+    {
+        void SetMainTexture(Texture texture);
+    }
+    
+    [RequireComponent(typeof(Renderer))]
+    public class GridCellPresenter : MonoBehaviour
+    {
         private Renderer _renderer;
+        private static readonly int IsHovered = Shader.PropertyToID("_Is_Hovered");
+        private static readonly int IsSelected = Shader.PropertyToID("_Is_Selected");
         private static readonly int MainTex = Shader.PropertyToID("_MainTex");
+
+        public IGridCellPresenterController InitializeController(IGridCellViewModel cellViewModel)
+        {
+            if (_controller != null) throw new Exception();
+            
+            _controller = new Controller(
+                cellViewModel, 
+                new GridCellRenderer(_renderer), 
+                new GridCellTransform(transform),
+                new GridCellGameObject(gameObject));
+
+            return _controller;
+        }
+        
+        public class Controller : IGridCellPresenterController, IDisposable
+        {
+            private readonly IGridCellRenderer _renderer;
+            private readonly IGridCellViewModel _cellViewModel;
+            private MaterialPropertyBlock _materialOverrides;
+            public Controller(
+                IGridCellViewModel cellViewModel, 
+                IGridCellRenderer renderer, 
+                IGridCellTransform transform,
+                IGridCellGameObject gridCellGameObject)
+            {
+                _cellViewModel = cellViewModel ?? throw new ArgumentNullException(nameof(cellViewModel));
+                _renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
+                cellViewModel.PropertyChanged += CellOnPropertyChanged;
+                gridCellGameObject.Name = $"row: {cellViewModel.RowIndex}, col: {cellViewModel.ColIndex}";
+                transform.Position = cellViewModel.WorldPosition;
+            }
+            
+            public void Dispose()
+            {
+                if (_cellViewModel == null) return;
+                _cellViewModel.PropertyChanged -= CellOnPropertyChanged;
+            }
+            
+            private void CellOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+            {
+                var cell = (IGridCellViewModel)sender;
+
+                switch (e.PropertyName)
+                {
+                    case nameof(IGridCellViewModel.IsPinned):
+                    case nameof(IGridCellViewModel.IsHighlighted):
+                    {
+                        _materialOverrides.SetFloat(IsHovered, cell.IsHighlighted || cell.IsPinned ? 1 : 0);
+                        _renderer.SetPropertyBlock(_materialOverrides);
+                        return;
+                    }
+                    case nameof(IGridCellViewModel.IsSelected):
+                    {
+                        _materialOverrides.SetFloat(IsSelected, cell.IsSelected ? 1 : 0);
+                        _renderer.SetPropertyBlock(_materialOverrides);
+                        return;
+                    }
+                }
+            }
+
+            public void SetMainTexture(Texture texture)
+            {
+                _materialOverrides.SetTexture(MainTex, texture);
+                _renderer.SetPropertyBlock(_materialOverrides);
+            }
+        }
+        
+
+        private Controller _controller;
 
         private void Awake()
         {
             _renderer = GetComponent<Renderer>();
-
             Assert.IsNotNull(_renderer, "_renderer != null");
-
-            _selectedState = new MaterialPropertyBlock();
-            _hoverState = new MaterialPropertyBlock();
-            _normalState = new MaterialPropertyBlock();
-
-            _selectedState.SetColor(BaseColorProp, selectionColor);
-            _hoverState.SetColor(BaseColorProp, hoverColor);
-            _normalState.SetColor(BaseColorProp, _renderer.material.GetColor(BaseColorProp));
         }
 
         private void OnDestroy()
         {
-            if (_cell == null) return;
-            _cell.PropertyChanged -= CellOnPropertyChanged;
+            _controller?.Dispose();
         }
-
-        public void SetDataModel(IGridCell cell)
-        {
-            _cell = cell;
-            Bind(cell);
-        }
-
-        private void Bind(IGridCell cell)
-        {
-            cell.PropertyChanged += CellOnPropertyChanged;
-            name = $"row: {cell.RowIndex}, col: {cell.ColIndex}";
-            transform.position = cell.WorldPosition;
-            _normalState.SetTexture(MainTex, cell.TerrainVariant.ColorTexture);
-            _hoverState.SetTexture(MainTex, cell.TerrainVariant.ColorTexture);
-            _selectedState.SetTexture(MainTex, cell.TerrainVariant.ColorTexture);
-            _renderer.SetPropertyBlock(_normalState);
-        }
-
-        private void CellOnPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            var cell = (IGridCell)sender;
-
-            switch (e.PropertyName)
-            {
-                case nameof(IGridCell.IsHighlighted):
-                {
-                    UpdateHoverState(cell);
-                    return;
-                }
-                case nameof(IGridCell.IsSelected):
-                {
-                    UpdateSelectionState(cell);
-                    return;
-                }
-                case nameof(IGridCell.IsPinned):
-                {
-                    UpdatePinState(cell);
-                    return;
-                }
-            }
-        }
-
-        private void UpdatePinState(IGridCell cell)
-        {
-            if(cell.IsSelected) return;
-            if (cell.IsPinned)
-            {
-                _renderer.SetPropertyBlock(_hoverState);
-            }
-            else
-            {
-                UpdateHoverState(cell);
-            }
-        }
-
-        private void UpdateSelectionState(IGridCell cell)
-        {
-            if (cell.IsSelected)
-            {
-                _renderer.SetPropertyBlock(_selectedState);
-            }
-            else
-            {
-                UpdateHoverState(cell);
-            }
-        }
-
-        private void UpdateHoverState(IGridCell cell)
-        {
-            if (cell.IsSelected || cell.IsPinned) return;
-            _renderer.SetPropertyBlock(cell.IsHighlighted ? _hoverState : _normalState);
-        }
-
     }
 }

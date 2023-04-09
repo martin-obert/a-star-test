@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b461dc1cc0164f93a1d8f83f8d011a4b, type: 3}
+  m_Name: TerrainVariant - Grass
+  m_EditorClassIdentifier: 
+  daysTravelCost: 1
+  isWalkable: 1
+  type: 1
+  texture: {fileID: 2800000, guid: dea42c1ce0c5947b1826926d46ac10b3, type: 3}

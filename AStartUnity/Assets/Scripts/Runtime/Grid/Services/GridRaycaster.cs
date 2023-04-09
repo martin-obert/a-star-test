@@ -3,31 +3,47 @@ using UnityEngine;
 
 namespace Runtime.Grid.Services
 {
-    public sealed class GridRaycaster : IGridRaycaster
+
+    public interface IGridRaycastCamera
     {
-        private Camera _mainCamera;
+        Vector3 Position { get; }
+        Vector3 ScreenToWorldPoint(Vector2 mousePosition);
+    }
 
-        public Ray GetRayFromMousePosition(Vector2 mousePosition)
+    internal sealed class GridRaycastCamera : IGridRaycastCamera
+    {
+        private readonly Camera _camera;
+
+        public GridRaycastCamera(Camera camera)
         {
-            if (!_mainCamera)
-            {
-                _mainCamera = Camera.main;
-            }
+            _camera = camera ? camera : throw new ArgumentNullException(nameof(camera));
+        }
 
-            if (!_mainCamera)
+        public Vector3 Position => _camera.transform.position;
+        
+        public Vector3 ScreenToWorldPoint(Vector2 mousePosition)
+        {
+            return _camera.ScreenToWorldPoint(new Vector3(mousePosition.x, mousePosition.y, _camera.nearClipPlane));
+        }
+    }
+
+    public static class GridRaycaster 
+    {
+        public static Ray GetRayFromMousePosition(IGridRaycastCamera mainCamera, Vector2 mousePosition)
+        {
+            if (mainCamera == null)
             {
                 throw new NullReferenceException("No main camera");
             }
 
-            var cameraPosition = _mainCamera.transform.position;
+            var cameraPosition = mainCamera.Position;
 
-            var cursor = _mainCamera.ScreenToWorldPoint(new Vector3(mousePosition.x, mousePosition.y,
-                _mainCamera.nearClipPlane));
+            var cursor = mainCamera.ScreenToWorldPoint(new Vector3(mousePosition.x, mousePosition.y));
             var direction = cursor - cameraPosition;
             return new Ray(cameraPosition, direction);
         }
 
-        public bool TryGetHitOnGrid(Ray ray, out Vector3 hitPoint)
+        public static bool TryGetHitOnGrid(Ray ray, out Vector3 hitPoint)
         {
             hitPoint = Vector3.zero;
 

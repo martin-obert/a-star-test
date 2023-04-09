@@ -1,22 +1,19 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Runtime.Definitions;
 using Runtime.Grid.Data;
 using UnityEngine;
 
 namespace Runtime.Grid.Presenters
 {
-    public static class GridDefinitions
-    {
-        public const float WidthRadius = .5f;
-        public const float HeightRadius = .5f;
-    }
-
     public static class GridCellHelpers
     {
         public static bool IsCellOdd(int rowIndex) => rowIndex % 2 != 0;
 
-        public static IGridCell GetCellByCoords(IEnumerable<IGridCell> source, int rowIndex, int colIndex)
+        public static IGridCellViewModel GetCellByCoords(IEnumerable<IGridCellViewModel> source, int rowIndex, int colIndex)
         {
             return source.FirstOrDefault(x => x.RowIndex == rowIndex && x.ColIndex == colIndex);
         }
@@ -41,41 +38,54 @@ namespace Runtime.Grid.Presenters
             return result;
         }
 
-        public static IGridCell GetCellByWorldPoint(Vector2 cursorPosition,
-            IEnumerable<IGridCell> cells)
+        public static IGridCellViewModel GetCellByWorldPoint(Vector2 cursorPosition,
+            IEnumerable<IGridCellViewModel> cells)
         {
-            var boxHitCastResults = cells.Where(x => IsBoxCastHit(x, cursorPosition)).ToArray();
-
-            if (boxHitCastResults.Length == 0) return null;
-            if (boxHitCastResults.Length <= 1) return boxHitCastResults[0];
-
-            var circleCastResult = boxHitCastResults.Where(x => IsCircleCastHit(x, cursorPosition)).ToArray();
-            if (circleCastResult.Length == 0)
+            var gridCells = cells.ToArray();
+            var result = new ConcurrentBag<IGridCellViewModel>();
+            Parallel.ForEach(gridCells, c =>
             {
-                throw new Exception("This should not happen");
+                if (!IsBoxCastHit(c, cursorPosition)) return;
+                result.Add(c);
+            });
+            if (result.IsEmpty) return null;
+            if (result.Count == 1)
+            {
+                return result.First();
             }
 
-            return circleCastResult[0];
+            var circleCastResult = result.Where(x => IsCircleCastHit(x, cursorPosition)).ToArray();
+            if (circleCastResult.Length == 1)
+            {
+                return circleCastResult[0];
+            }
+
+            if (circleCastResult.Length > 1)
+            {
+                // TODO: hexagon shape cast result
+            }
+
+            return null;
         }
 
 
-        public static bool IsBoxCastHit(IGridCell cell, Vector2 cursor)
+        public static bool IsBoxCastHit(IGridCellViewModel cellViewModel, Vector2 cursor)
         {
-            var position = cell.WorldPosition;
-            var v = cursor.y <= position.z + cell.HeightHalf &&
-                    cursor.y >= position.z - cell.HeightHalf;
+            var position = cellViewModel.WorldPosition;
+            var v = cursor.y <= position.z + cellViewModel.HeightHalf &&
+                    cursor.y >= position.z - cellViewModel.HeightHalf;
 
-            var h = cursor.x <= position.x + cell.WidthHalf &&
-                    cursor.x >= position.x - cell.WidthHalf;
+            var h = cursor.x <= position.x + cellViewModel.WidthHalf &&
+                    cursor.x >= position.x - cellViewModel.WidthHalf;
 
             return v && h;
         }
 
-        public static bool IsCircleCastHit(IGridCell cell, Vector2 cursor)
+        public static bool IsCircleCastHit(IGridCellViewModel cellViewModel, Vector2 cursor)
         {
-            var position = cell.WorldPosition;
-            return IsPointInsideEllipse(cursor.x, cursor.y, position.x, position.z, cell.WidthHalf,
-                cell.HeightHalf);
+            var position = cellViewModel.WorldPosition;
+            return IsPointInsideEllipse(cursor.x, cursor.y, position.x, position.z, cellViewModel.WidthHalf,
+                cellViewModel.HeightHalf);
         }
 
         private static bool IsPointInsideEllipse(double x, double y, double cx, double cy, double a, double b)

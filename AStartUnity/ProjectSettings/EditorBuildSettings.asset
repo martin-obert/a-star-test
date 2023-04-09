@@ -6,6 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Hex World.unity
-    guid: fb641e4ae1d1fe94fb436c89bf07ed7a
-  m_configObjects: {}
+    path: Assets/Scenes/Application Entry Scene.unity
+    guid: d385eea3f3502de418cdf9b28c0c63f8
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: 6e482a6c5b5285f4cba5ddfdf874c3e2,
+      type: 2}

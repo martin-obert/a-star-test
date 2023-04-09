@@ -1,5 +1,9 @@
-﻿using Runtime.Grid.Services;
+﻿using System;
+using Runtime.Grid.Services;
 using Runtime.Inputs;
+using Runtime.Messaging;
+using Runtime.Services;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -8,36 +12,35 @@ namespace Runtime.Cinematic
     [RequireComponent(typeof(Camera))]
     public sealed class CameraRigManager : MonoBehaviour
     {
-        private Camera _camera;
         [SerializeField] private float cameraSpeed = 1;
         [SerializeField] private Transform root;
 
+        private readonly CameraRigService _cameraRigService = new();
+        private IUserInputService _userInputService;
+        private IGridService _gridService;
         private void Awake()
         {
             Assert.IsNotNull(root, "root != null");
-            _camera = GetComponent<Camera>();
+        }
+
+        private void Start()
+        {
+            _gridService = ServiceInjector.Instance.GridService;
+            _userInputService = ServiceInjector.Instance.UserInputService;
+
+            ServiceInjector.Instance.EventSubscriber
+                .OnGridInstantiated()
+                .Where(_ => _gridService != null)
+                .Subscribe(_ =>
+                {
+                    var center = _gridService.Center;
+                    root.transform.position = new Vector3(center.x, 0, center.y);
+                }).AddTo(this);
         }
 
         private void Update()
         {
-            var currentPosition = root.position;
-
-            var movementVector = UserInputManager.Instance.AxisMovement;
-
-            if (movementVector != Vector3.zero)
-            {
-                var newPosition = currentPosition + movementVector * (cameraSpeed * Time.deltaTime);
-                if (!GridManager.Instance.IsPointOnGrid(new Vector2(newPosition.x, root.transform.position.z)))
-                {
-                    newPosition.x = root.position.x;
-                }
-                if (!GridManager.Instance.IsPointOnGrid(new Vector2(root.position.x, newPosition.z)))
-                {
-                    newPosition.z = root.position.z;
-                }
-
-                root.position = newPosition;
-            }
+            _cameraRigService.UpdatePosition(root, cameraSpeed, _userInputService.AxisMovementVector, _gridService.IsPointOnGrid);
         }
     }
 }

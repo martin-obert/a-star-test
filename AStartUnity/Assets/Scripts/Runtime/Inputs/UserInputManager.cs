@@ -1,41 +1,35 @@
 ﻿using System;
+using Runtime.Grid.Services;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Runtime.Inputs
 {
-    internal sealed class UserInputManager : MonoBehaviour, IUserInputManager
+    internal sealed class UserInputManager : MonoBehaviour
     {
-
-        public static IUserInputManager Instance { get; private set; }
-
-        public event EventHandler SelectCell;
-        public Vector2 MousePosition => Input.mousePosition;
-        public Vector3 AxisMovement => new(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
-
+        private IDisposable _serviceRegistrationHook;
+        private UserInputService _service;
 
         private void Awake()
         {
-            if (Instance != null && !ReferenceEquals(Instance, this))
-            {
-                Destroy(this);
-                return;
-            }
-
-            Instance = this;
-        }
-
-        private void OnSelectCell()
-        {
-            SelectCell?.Invoke(this, EventArgs.Empty);
+            _serviceRegistrationHook =
+                ServiceInjector.Instance.RegisterService<IUserInputService>(_service = new UserInputService());
         }
 
         private void Update()
         {
+            _service.AxisMovementVector = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+            _service.MousePosition = Input.mousePosition;
+            
             if (Input.GetMouseButtonDown((int)MouseButton.LeftMouse))
             {
-                OnSelectCell();
+                _service.OnSelectCell();
             }
+        }
+
+        private void OnDestroy()
+        {
+            _serviceRegistrationHook?.Dispose();
         }
     }
 }
