@@ -5,6 +5,6 @@ namespace Runtime.Grid.Services
 {
     public interface IPrefabInstantiator
     {
-        GridCellPresenter InstantiateGridCellPresenter(IGridCell cell);
+        IGridCellPresenterController InstantiateGridCellPresenter(IGridCellViewModel viewModel);
     }
 }

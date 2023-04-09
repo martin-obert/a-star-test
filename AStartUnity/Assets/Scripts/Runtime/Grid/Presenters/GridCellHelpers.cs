@@ -13,7 +13,7 @@ namespace Runtime.Grid.Presenters
     {
         public static bool IsCellOdd(int rowIndex) => rowIndex % 2 != 0;
 
-        public static IGridCell GetCellByCoords(IEnumerable<IGridCell> source, int rowIndex, int colIndex)
+        public static IGridCellViewModel GetCellByCoords(IEnumerable<IGridCellViewModel> source, int rowIndex, int colIndex)
         {
             return source.FirstOrDefault(x => x.RowIndex == rowIndex && x.ColIndex == colIndex);
         }
@@ -38,11 +38,11 @@ namespace Runtime.Grid.Presenters
             return result;
         }
 
-        public static IGridCell GetCellByWorldPoint(Vector2 cursorPosition,
-            IEnumerable<IGridCell> cells)
+        public static IGridCellViewModel GetCellByWorldPoint(Vector2 cursorPosition,
+            IEnumerable<IGridCellViewModel> cells)
         {
             var gridCells = cells.ToArray();
-            var result = new ConcurrentBag<IGridCell>();
+            var result = new ConcurrentBag<IGridCellViewModel>();
             Parallel.ForEach(gridCells, c =>
             {
                 if (!IsBoxCastHit(c, cursorPosition)) return;
@@ -69,23 +69,23 @@ namespace Runtime.Grid.Presenters
         }
 
 
-        public static bool IsBoxCastHit(IGridCell cell, Vector2 cursor)
+        public static bool IsBoxCastHit(IGridCellViewModel cellViewModel, Vector2 cursor)
         {
-            var position = cell.WorldPosition;
-            var v = cursor.y <= position.z + cell.HeightHalf &&
-                    cursor.y >= position.z - cell.HeightHalf;
+            var position = cellViewModel.WorldPosition;
+            var v = cursor.y <= position.z + cellViewModel.HeightHalf &&
+                    cursor.y >= position.z - cellViewModel.HeightHalf;
 
-            var h = cursor.x <= position.x + cell.WidthHalf &&
-                    cursor.x >= position.x - cell.WidthHalf;
+            var h = cursor.x <= position.x + cellViewModel.WidthHalf &&
+                    cursor.x >= position.x - cellViewModel.WidthHalf;
 
             return v && h;
         }
 
-        public static bool IsCircleCastHit(IGridCell cell, Vector2 cursor)
+        public static bool IsCircleCastHit(IGridCellViewModel cellViewModel, Vector2 cursor)
         {
-            var position = cell.WorldPosition;
-            return IsPointInsideEllipse(cursor.x, cursor.y, position.x, position.z, cell.WidthHalf,
-                cell.HeightHalf);
+            var position = cellViewModel.WorldPosition;
+            return IsPointInsideEllipse(cursor.x, cursor.y, position.x, position.z, cellViewModel.WidthHalf,
+                cellViewModel.HeightHalf);
         }
 
         private static bool IsPointInsideEllipse(double x, double y, double cx, double cy, double a, double b)

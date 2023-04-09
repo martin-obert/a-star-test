@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Runtime.Grid.Data
 {
-    public interface IGridCell : IAStarNode, INotifyPropertyChanged
+    public interface IGridCellViewModel : IAStarNode, INotifyPropertyChanged
     {
         bool IsSelected { get; }
         bool IsPinned { get; }
@@ -20,7 +20,7 @@ namespace Runtime.Grid.Data
         Vector3 WorldPosition { get; }
         public float HeightHalf { get; }
         public float WidthHalf { get; }
-        void SetNeighbours(IEnumerable<IGridCell> neighbours);
+        void SetNeighbours(IEnumerable<IGridCellViewModel> neighbours);
         bool IsWalkable { get; }
         TerrainType TerrainType { get; }
     }

@@ -9,9 +9,9 @@ namespace Runtime.Grid
 {
     public static class GridCellFactory
     {
-        public static IGridCell Create(int row, int col, ITerrainVariant terrainVariant)
+        public static IGridCellViewModel Create(int row, int col, ITerrainVariant terrainVariant)
         {
-            return new GridCell
+            return new GridCellViewModel
             {
                 RowIndex = row,
                 ColIndex = col,
@@ -25,7 +25,7 @@ namespace Runtime.Grid
             };
         }
         
-        public static IGridCell Create(int row, int col, TerrainType type, IEnumerable<ITerrainVariant> terrainVariants)
+        public static IGridCellViewModel Create(int row, int col, TerrainType type, IEnumerable<ITerrainVariant> terrainVariants)
         {
             var terrainVariant = terrainVariants.First(x => x.Type == type);
             return Create(row, col, terrainVariant);

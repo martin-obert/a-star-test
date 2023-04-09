@@ -13,7 +13,7 @@ namespace Runtime.Grid.Data
     /// <summary>
     /// Implementation of a <see cref="IAStarNode"/>
     /// </summary>
-    public sealed class GridCell : IGridCell
+    public sealed class GridCellViewModel : IGridCellViewModel
     {
         private bool _isSelected;
         private bool _isHighlighted;
@@ -88,7 +88,7 @@ namespace Runtime.Grid.Data
         public float HeightHalf { get; set; }
         public float WidthHalf { get; set; }
 
-        public void SetNeighbours(IEnumerable<IGridCell> neighbours)
+        public void SetNeighbours(IEnumerable<IGridCellViewModel> neighbours)
         {
             Neighbours = neighbours;
         }
@@ -115,7 +115,7 @@ namespace Runtime.Grid.Data
 
         public float EstimatedCostTo(IAStarNode target)
         {
-            if (target is not IGridCell gridCell) throw new Exception("Must be a grid cell for pathfinding est.");
+            if (target is not IGridCellViewModel gridCell) throw new Exception("Must be a grid cell for pathfinding est.");
             if (!gridCell.IsWalkable)
                 return float.MaxValue;
             

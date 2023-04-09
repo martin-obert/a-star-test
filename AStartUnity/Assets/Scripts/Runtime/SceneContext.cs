@@ -7,7 +7,7 @@ namespace Runtime
     {
         public int RowCount { get; set; }
         public int ColCount { get; set; }
-        public IGridCell[] Cells { get; set; }
+        public IGridCellViewModel[] Cells { get; set; }
 
         public bool HasCells()
         {

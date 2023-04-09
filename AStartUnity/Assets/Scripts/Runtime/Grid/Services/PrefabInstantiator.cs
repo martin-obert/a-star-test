@@ -7,12 +7,10 @@ namespace Runtime.Grid.Services
     internal class PrefabInstantiator : IPrefabInstantiator
     {
         private readonly IAddressableManager _addressableManager;
-        public GridCellPresenter InstantiateGridCellPresenter(IGridCell gridCell)
+        public IGridCellPresenterController InstantiateGridCellPresenter(IGridCellViewModel viewModel)
         {
             var prefab = _addressableManager.GetCellPrefab();
-            var terrainVariant = _addressableManager.GetTerrainVariantByType(gridCell.TerrainType);
-            prefab.SetDataModel(gridCell, terrainVariant);
-            return Object.Instantiate(prefab);
+            return Object.Instantiate(prefab).InitializeController(viewModel);
         }
     }
 }

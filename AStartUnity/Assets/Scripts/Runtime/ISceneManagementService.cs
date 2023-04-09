@@ -7,6 +7,6 @@ namespace Runtime
     public interface ISceneManagementService
     {
         UniTask LoadWorldAsync(int rowsCount, int colsCount, CancellationToken token = default);
-        UniTask LoadLayoutAsync(IGridCell[] cells, CancellationToken token = default);
+        UniTask LoadLayoutAsync(IGridCellViewModel[] cells, CancellationToken token = default);
     }
 }

@@ -10,12 +10,13 @@ namespace Runtime.Grid
 {
     public static class GridGenerator
     {
-        public static IGridCell[] GenerateGrid(int rowCount, int colCount, Func<ITerrainVariant> getRandomTerrainVariant)
+        public static IGridCellViewModel[] GenerateGrid(int rowCount, int colCount, Func<ITerrainVariant> getRandomTerrainVariant)
         {
             if (rowCount <= 0) throw new ArgumentOutOfRangeException(nameof(rowCount), rowCount, "must be greater than 0");
             if (colCount <= 0) throw new ArgumentOutOfRangeException(nameof(colCount), colCount, "must be greater than 0");
-
-            var result = new IGridCell[rowCount * colCount];
+            if (getRandomTerrainVariant == null) throw new ArgumentNullException(nameof(getRandomTerrainVariant));
+            
+            var result = new IGridCellViewModel[rowCount * colCount];
 
             Parallel.For(0, rowCount, row =>
             {
@@ -30,7 +31,7 @@ namespace Runtime.Grid
             return result;
         }
 
-        public static void PopulateNeighbours(IGridCell[] grid)
+        public static void PopulateNeighbours(IGridCellViewModel[] grid)
         {
             Parallel.ForEach(grid, gridCell =>
             {
@@ -40,21 +41,21 @@ namespace Runtime.Grid
 
         }
 
-        public static IEnumerable<IGridCell> CollectNeighbours(IGridCell currentCell, IGridCell[] grid)
+        public static IEnumerable<IGridCellViewModel> CollectNeighbours(IGridCellViewModel currentCellViewModel, IGridCellViewModel[] grid)
         {
-            var shift = currentCell.IsOddRow ? 0 : -1;
+            var shift = currentCellViewModel.IsOddRow ? 0 : -1;
             var result = new[]
             {
-                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex, currentCell.ColIndex + 1),
-                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex, currentCell.ColIndex - 1),
-                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex - 1,
-                    currentCell.ColIndex + shift),
-                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex - 1,
-                    currentCell.ColIndex + shift + 1),
-                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex + 1,
-                    currentCell.ColIndex + shift),
-                GridCellHelpers.GetCellByCoords(grid, currentCell.RowIndex + 1,
-                    currentCell.ColIndex + shift + 1),
+                GridCellHelpers.GetCellByCoords(grid, currentCellViewModel.RowIndex, currentCellViewModel.ColIndex + 1),
+                GridCellHelpers.GetCellByCoords(grid, currentCellViewModel.RowIndex, currentCellViewModel.ColIndex - 1),
+                GridCellHelpers.GetCellByCoords(grid, currentCellViewModel.RowIndex - 1,
+                    currentCellViewModel.ColIndex + shift),
+                GridCellHelpers.GetCellByCoords(grid, currentCellViewModel.RowIndex - 1,
+                    currentCellViewModel.ColIndex + shift + 1),
+                GridCellHelpers.GetCellByCoords(grid, currentCellViewModel.RowIndex + 1,
+                    currentCellViewModel.ColIndex + shift),
+                GridCellHelpers.GetCellByCoords(grid, currentCellViewModel.RowIndex + 1,
+                    currentCellViewModel.ColIndex + shift + 1),
             };
             return result.Where(x => x != null).Distinct().ToArray();
         }

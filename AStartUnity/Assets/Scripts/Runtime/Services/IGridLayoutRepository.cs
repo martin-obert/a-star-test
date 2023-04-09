@@ -10,9 +10,9 @@ namespace Runtime.Services
     {
         string[] ListSaves();
 
-        UniTask<IGridCell[]> LoadAsync(string filename, ITerrainVariant[] terrainVariants,
+        UniTask<IGridCellViewModel[]> LoadAsync(string filename, ITerrainVariant[] terrainVariants,
             CancellationToken token = default);
 
-        UniTask SaveAsync(IEnumerable<IGridCell> cells, CancellationToken token = default);
+        UniTask SaveAsync(IEnumerable<IGridCellViewModel> cells, CancellationToken token = default);
     }
 }

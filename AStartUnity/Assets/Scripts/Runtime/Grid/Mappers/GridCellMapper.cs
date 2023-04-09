@@ -9,13 +9,13 @@ namespace Runtime.Grid.Mappers
 {
     public static class GridCellMapper
     {
-        public static IGridCell GridCellFromSave(GridCellSave value, IEnumerable<ITerrainVariant> terrainVariants)
+        public static IGridCellViewModel GridCellFromSave(GridCellSave value, IEnumerable<ITerrainVariant> terrainVariants)
         {
             return GridCellFactory.Create(value.RowIndex, value.ColIndex,
                 terrainVariants.First(x => x.Type == value.TerrainType));
         }
 
-        public static GridCellSave ToGridCellSave(IGridCell value)
+        public static GridCellSave ToGridCellSave(IGridCellViewModel value)
         {
             return new GridCellSave
             {

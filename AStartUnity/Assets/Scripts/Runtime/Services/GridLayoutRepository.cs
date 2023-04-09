@@ -31,7 +31,7 @@ namespace Runtime.Services
             return Directory.GetFiles(filepath, "*.json");
         }
 
-        public  async UniTask<IGridCell[]> LoadAsync(string filename, ITerrainVariant[] terrainVariants,
+        public  async UniTask<IGridCellViewModel[]> LoadAsync(string filename, ITerrainVariant[] terrainVariants,
             CancellationToken token = default)
         {
             var fullPath = Path.Combine(GetFilepath(), filename);
@@ -46,7 +46,7 @@ namespace Runtime.Services
         }
 
 
-        public  async UniTask SaveAsync(IEnumerable<IGridCell> cells, CancellationToken token = default)
+        public  async UniTask SaveAsync(IEnumerable<IGridCellViewModel> cells, CancellationToken token = default)
         {
             var saves = cells.Select(GridCellMapper.ToGridCellSave).ToArray();
             var fullPath = Path.Combine(GetFilepath(), $"{CreateFilename()}.json");

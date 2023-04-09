@@ -9,13 +9,13 @@ namespace Runtime.Gameplay
 {
     public sealed class PathfindingContext : IDisposable
     {
-        private IGridCell _start;
-        private IGridCell _destination;
-        private IGridCell[] _selectedPath;
+        private IGridCellViewModel _start;
+        private IGridCellViewModel _destination;
+        private IGridCellViewModel[] _selectedPath;
         private bool _isPlotting;
         private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-        public void AddWaypoint(IGridCell gridCell)
+        public void AddWaypoint(IGridCellViewModel gridCellViewModel)
         {
             if(_isPlotting) return;
 
@@ -24,21 +24,21 @@ namespace Runtime.Gameplay
                 ClearWaypoint(_start);
                 ClearWaypoint(_destination);
                 ClearPath();
-                _start = gridCell;
+                _start = gridCellViewModel;
                 HighlightWaypoint(_start);
                 _destination = null;
                 return;
             }
 
-            if (_start == null && !DoesWaypointOverlap(_destination, gridCell))
+            if (_start == null && !DoesWaypointOverlap(_destination, gridCellViewModel))
             {
-                _start = gridCell;
+                _start = gridCellViewModel;
                 HighlightWaypoint(_start);
             }
 
-            if (_destination == null && !DoesWaypointOverlap(_start, gridCell))
+            if (_destination == null && !DoesWaypointOverlap(_start, gridCellViewModel))
             {
-                _destination = gridCell;
+                _destination = gridCellViewModel;
                 HighlightWaypoint(_destination);
             }
 
@@ -51,7 +51,7 @@ namespace Runtime.Gameplay
 
                     await UniTask.SwitchToThreadPool();
                     
-                    _selectedPath = AStar.GetPath(_start, _destination).OfType<IGridCell>().ToArray();
+                    _selectedPath = AStar.GetPath(_start, _destination).OfType<IGridCellViewModel>().ToArray();
                     
                     await UniTask.SwitchToMainThread(_cancellationTokenSource.Token);
                     
@@ -69,7 +69,7 @@ namespace Runtime.Gameplay
             });
         }
 
-        private static bool DoesWaypointOverlap(IGridCell a, IGridCell b)
+        private static bool DoesWaypointOverlap(IGridCellViewModel a, IGridCellViewModel b)
         {
             return ReferenceEquals(a, b);
         }
@@ -85,14 +85,14 @@ namespace Runtime.Gameplay
             ClearPath();
         }
 
-        private static void HighlightWaypoint(IGridCell gridCell)
+        private static void HighlightWaypoint(IGridCellViewModel gridCellViewModel)
         {
-            gridCell?.ToggleSelected(true);
+            gridCellViewModel?.ToggleSelected(true);
         }
 
-        private static void ClearWaypoint(IGridCell gridCell)
+        private static void ClearWaypoint(IGridCellViewModel gridCellViewModel)
         {
-            gridCell?.ToggleSelected(false);
+            gridCellViewModel?.ToggleSelected(false);
         }
 
         private void HighlightPath()

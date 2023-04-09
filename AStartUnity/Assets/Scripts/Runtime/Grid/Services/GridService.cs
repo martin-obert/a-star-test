@@ -19,9 +19,10 @@ namespace Runtime.Grid.Services
 {
     internal sealed class GridService : IGridService, IDisposable
     {
-        private IGridCell _hoverCell;
+        private IGridCellViewModel _hoverCellViewModel;
         private readonly Random _random = new();
         private readonly IPrefabInstantiator _prefabInstantiator;
+        private readonly IAddressableManager _addressableManager;
 
         public Rect Bounds { get; private set; }
 
@@ -29,20 +30,21 @@ namespace Runtime.Grid.Services
 
         public Vector2 Center => Bounds.center;
 
-        public IEnumerable<IGridCell> Cells => _currentCells;
+        public IEnumerable<IGridCellViewModel> Cells => _currentCells;
 
         private readonly CompositeDisposable _disposable = new();
         private readonly PathfindingContext _pathfindingContext = new();
-        private IGridCell[] _currentCells;
+        private IGridCellViewModel[] _currentCells;
 
-        public GridService(IPrefabInstantiator prefabInstantiator)
+        public GridService(IPrefabInstantiator prefabInstantiator, IAddressableManager addressableManager)
         {
+            _addressableManager = addressableManager ?? throw new ArgumentNullException(nameof(addressableManager));
             _prefabInstantiator = prefabInstantiator ?? throw new ArgumentNullException(nameof(prefabInstantiator));
         }
 
         public void SelectHoveredCell()
         {
-            var gridCell = _hoverCell;
+            var gridCell = _hoverCellViewModel;
 
             if (gridCell is not { IsWalkable: true }) return;
 
@@ -64,9 +66,9 @@ namespace Runtime.Grid.Services
             _pathfindingContext?.Dispose();
         }
 
-        public void CreateNewGrid(int rowCount, int colCount, ITerrainVariant[] terrainVariants)
+        public void CreateNewGrid(int rowCount, int colCount)
         {
-            var cells = GridGenerator.GenerateGrid(rowCount, colCount, () => GetRandomTerrainVariant(terrainVariants));
+            var cells = GridGenerator.GenerateGrid(rowCount, colCount, () => GetRandomTerrainVariant());
 
             InstantiateGrid(rowCount, colCount, cells);
         }
@@ -80,11 +82,11 @@ namespace Runtime.Grid.Services
                 maxCell.WorldPosition.z);
         }
 
-        public void UpdateHoveringCell(Camera mainCamera, IUserInputService userInputService)
+        public void UpdateHoveringCell(IGridRaycastCamera mainCamera, Vector2 mousePosition)
         {
             if (_currentCells == null) return;
 
-            var ray = GridRaycaster.GetRayFromMousePosition(mainCamera, userInputService.MousePosition);
+            var ray = GridRaycaster.GetRayFromMousePosition(mainCamera, mousePosition);
 
             if (!GridRaycaster.TryGetHitOnGrid(ray, out var hitPoint)) return;
 
@@ -93,34 +95,47 @@ namespace Runtime.Grid.Services
 
             if (hoveredCell != null)
             {
-                if (hoveredCell == _hoverCell) return;
-                _hoverCell?.ToggleHighlighted(false);
-                _hoverCell = hoveredCell;
-                _hoverCell?.ToggleHighlighted(true);
+                if (hoveredCell == _hoverCellViewModel) return;
+                _hoverCellViewModel?.ToggleHighlighted(false);
+                _hoverCellViewModel = hoveredCell;
+                _hoverCellViewModel?.ToggleHighlighted(true);
             }
             else
             {
-                _hoverCell?.ToggleHighlighted(false);
-                _hoverCell = null;
+                _hoverCellViewModel?.ToggleHighlighted(false);
+                _hoverCellViewModel = null;
             }
         }
 
-        public void InstantiateGrid(int rowCount, int colCount, IGridCell[] cells)
+        public void InstantiateGrid(int rowCount, int colCount, IGridCellViewModel[] cells)
         {
+            if (rowCount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(rowCount), rowCount, "must be greater than 0");
+            if (colCount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(colCount), colCount, "must be greater than 0");
             _currentCells = cells;
+
+            if (cells == null) throw new ArgumentNullException(nameof(cells));
+
+            if (!cells.Any())
+                throw new InvalidOperationException("Sequence contains no elements. Empty cell array provided");
 
             GridGenerator.PopulateNeighbours(_currentCells);
 
             foreach (var gridCell in _currentCells)
             {
-                _prefabInstantiator.InstantiateGridCellPresenter(gridCell);
+                var terrainVariant = _addressableManager.GetTerrainVariantByType(gridCell.TerrainType);
+                var controller = _prefabInstantiator
+                    .InstantiateGridCellPresenter(gridCell);
+                controller.SetMainTexture(terrainVariant.TextureOverride);
             }
 
             SetBounds(rowCount, colCount);
         }
 
-        private ITerrainVariant GetRandomTerrainVariant(ITerrainVariant[] source)
+        private ITerrainVariant GetRandomTerrainVariant()
         {
+            var source = _addressableManager.GetTerrainVariants();
             return source[_random.Next(0, source.Length)];
         }
     }
