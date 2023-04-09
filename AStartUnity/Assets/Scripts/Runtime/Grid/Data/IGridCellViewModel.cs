@@ -18,6 +18,8 @@ namespace Runtime.Grid.Data
         int ColIndex { get; }
         bool IsOddRow { get; }
         Vector3 WorldPosition { get; }
+        Rect Bounds { get; }
+
         public float HeightHalf { get; }
         public float WidthHalf { get; }
         void SetNeighbours(IEnumerable<IGridCellViewModel> neighbours);

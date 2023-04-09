@@ -11,6 +11,6 @@ namespace Runtime.Grid.Services
         Vector2 Center { get; }
         IEnumerable<IGridCellViewModel> Cells { get; }
         void CreateNewGrid(int rowCount, int colCount);
-        void InstantiateGrid(int rowCount, int colCount, IGridCellViewModel[] cells);
+        void InstantiateGrid(int rowCount, int colCount, GridCellSave[] cells);
     }
 }

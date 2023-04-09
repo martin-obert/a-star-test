@@ -33,8 +33,7 @@ namespace Runtime.Grid.Services
             _serviceRegistrationHook =
                 ServiceInjector.Instance.RegisterService<IGridService>(s =>
                     _gridService = new GridService(
-                        s.GetService<IPrefabInstantiator>(),
-                        s.GetService<IAddressableManager>()
+                        s.GetService<IPrefabInstantiator>()
                     ));
         }
 
@@ -52,7 +51,6 @@ namespace Runtime.Grid.Services
                 await UseCases.GridInitialization(
                     context,
                     _gridService,
-                    ServiceInjector.Instance.AddressableManager,
                     ServiceInjector.Instance.EventPublisher
                 );
             });

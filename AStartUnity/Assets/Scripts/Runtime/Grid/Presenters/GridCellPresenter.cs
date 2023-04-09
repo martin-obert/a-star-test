@@ -1,161 +1,162 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using PathFinding;
+using Runtime.Definitions;
 using Runtime.Grid.Data;
+using Runtime.Grid.Services;
+using Runtime.Terrains;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace Runtime.Grid.Presenters
 {
-    public interface IGridCellGameObject
-    {
-        string Name { get; set; }
-    }
-
-    public sealed class GridCellGameObject : IGridCellGameObject
-    {
-        private readonly GameObject _gameObject;
-
-        public GridCellGameObject(GameObject gameObject)
-        {
-            _gameObject = gameObject;
-        }
-        public string Name
-        {
-            get => _gameObject.name;
-            set => _gameObject.name = value;
-        }
-    }
-
-    public interface IGridCellRenderer
-    {
-        void SetPropertyBlock(MaterialPropertyBlock materialPropertyBlock);
-    }
-
-    public interface IGridCellTransform
-    {
-        Vector3 Position { get; set; }
-    }
-
-    public sealed class GridCellTransform : IGridCellTransform
-    {
-        private readonly Transform _transform;
-
-        public GridCellTransform(Transform transform)
-        {
-            _transform = transform;
-        }
-        public Vector3 Position
-        {
-            get => _transform.position;
-            set => _transform.position = value;
-        }
-    }
-
-    public sealed class GridCellRenderer : IGridCellRenderer
-    {
-        private readonly Renderer _renderer;
-
-        public GridCellRenderer(Renderer renderer)
-        {
-            _renderer = renderer ? renderer : throw new ArgumentNullException(nameof(renderer));
-        }
-        public void SetPropertyBlock(MaterialPropertyBlock materialPropertyBlock)
-        {
-            _renderer.SetPropertyBlock(materialPropertyBlock);
-        }
-    }
-
-    public interface IGridCellPresenterController
-    {
-        void SetMainTexture(Texture texture);
-    }
-    
     [RequireComponent(typeof(Renderer))]
-    public class GridCellPresenter : MonoBehaviour
+    public class GridCellPresenter : MonoBehaviour, IGridCellViewModel
     {
-        private Renderer _renderer;
-        private static readonly int IsHovered = Shader.PropertyToID("_Is_Hovered");
-        private static readonly int IsSelected = Shader.PropertyToID("_Is_Selected");
-        private static readonly int MainTex = Shader.PropertyToID("_MainTex");
+        private bool _isSelected;
+        private bool _isHighlighted;
+        private bool _isPinned;
 
-        public IGridCellPresenterController InitializeController(IGridCellViewModel cellViewModel)
+        public bool IsPinned
         {
-            if (_controller != null) throw new Exception();
-            
-            _controller = new Controller(
-                cellViewModel, 
-                new GridCellRenderer(_renderer), 
-                new GridCellTransform(transform),
-                new GridCellGameObject(gameObject));
-
-            return _controller;
-        }
-        
-        public class Controller : IGridCellPresenterController, IDisposable
-        {
-            private readonly IGridCellRenderer _renderer;
-            private readonly IGridCellViewModel _cellViewModel;
-            private MaterialPropertyBlock _materialOverrides;
-            public Controller(
-                IGridCellViewModel cellViewModel, 
-                IGridCellRenderer renderer, 
-                IGridCellTransform transform,
-                IGridCellGameObject gridCellGameObject)
+            get => _isPinned;
+            private set
             {
-                _cellViewModel = cellViewModel ?? throw new ArgumentNullException(nameof(cellViewModel));
-                _renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
-                cellViewModel.PropertyChanged += CellOnPropertyChanged;
-                gridCellGameObject.Name = $"row: {cellViewModel.RowIndex}, col: {cellViewModel.ColIndex}";
-                transform.Position = cellViewModel.WorldPosition;
-            }
-            
-            public void Dispose()
-            {
-                if (_cellViewModel == null) return;
-                _cellViewModel.PropertyChanged -= CellOnPropertyChanged;
-            }
-            
-            private void CellOnPropertyChanged(object sender, PropertyChangedEventArgs e)
-            {
-                var cell = (IGridCellViewModel)sender;
-
-                switch (e.PropertyName)
-                {
-                    case nameof(IGridCellViewModel.IsPinned):
-                    case nameof(IGridCellViewModel.IsHighlighted):
-                    {
-                        _materialOverrides.SetFloat(IsHovered, cell.IsHighlighted || cell.IsPinned ? 1 : 0);
-                        _renderer.SetPropertyBlock(_materialOverrides);
-                        return;
-                    }
-                    case nameof(IGridCellViewModel.IsSelected):
-                    {
-                        _materialOverrides.SetFloat(IsSelected, cell.IsSelected ? 1 : 0);
-                        _renderer.SetPropertyBlock(_materialOverrides);
-                        return;
-                    }
-                }
-            }
-
-            public void SetMainTexture(Texture texture)
-            {
-                _materialOverrides.SetTexture(MainTex, texture);
-                _renderer.SetPropertyBlock(_materialOverrides);
+                if (value == _isPinned) return;
+                _isPinned = value;
+                OnPropertyChanged();
             }
         }
-        
 
-        private Controller _controller;
-
-        private void Awake()
+        public bool IsSelected
         {
-            _renderer = GetComponent<Renderer>();
-            Assert.IsNotNull(_renderer, "_renderer != null");
+            get => _isSelected;
+            private set
+            {
+                if (value == _isSelected) return;
+                _isSelected = value;
+                OnPropertyChanged();
+            }
         }
 
-        private void OnDestroy()
+        public bool IsHighlighted
         {
-            _controller?.Dispose();
+            get => _isHighlighted;
+            private set
+            {
+                if (value == _isHighlighted) return;
+                _isHighlighted = value;
+
+                OnPropertyChanged();
+            }
+        }
+
+
+        public void ToggleHighlighted(bool? value = null)
+        {
+            value ??= !IsHighlighted;
+
+            IsHighlighted = value.Value;
+        }
+
+        public void TogglePinned(bool? value = null)
+        {
+            value ??= !IsPinned;
+            IsPinned = value.Value;
+        }
+
+        public void ToggleSelected(bool? value = null)
+        {
+            value ??= !IsSelected;
+            IsSelected = value.Value;
+        }
+
+        /// <summary>
+        /// Row position on the grid
+        /// </summary>
+        public int RowIndex { get; set; }
+
+        /// <summary>
+        /// Column position on the grid
+        /// </summary>
+        public int ColIndex { get; set; }
+
+        public bool IsOddRow => GridCellHelpers.IsCellOdd(RowIndex);
+
+        public Vector3 WorldPosition { get; private set; }
+
+        public Rect Bounds { get; private set; }
+
+        public float HeightHalf { get; set; }
+        public float WidthHalf { get; set; }
+
+        public void SetNeighbours(IEnumerable<IGridCellViewModel> neighbours)
+        {
+            Neighbours = neighbours;
+        }
+
+        public bool IsWalkable { get; set; }
+        public TerrainType TerrainType { get; set; }
+
+        public IEnumerable<IAStarNode> Neighbours { get; private set; }
+
+
+        public float CostTo(IAStarNode neighbour)
+        {
+            if (neighbour == null)
+                throw new ArgumentNullException(nameof(neighbour));
+            if (!Neighbours.Contains(neighbour))
+                throw new Exception($"Not a neighbour of cell (r: {RowIndex} - c: {ColIndex})");
+
+            return IsWalkable ? DaysTravelCost : float.MaxValue;
+        }
+
+        public float DaysTravelCost { get; set; }
+
+        public float EstimatedCostTo(IAStarNode target)
+        {
+            if (target is not IGridCellViewModel gridCell)
+                throw new Exception("Must be a grid cell for pathfinding est.");
+            if (!gridCell.IsWalkable)
+                return float.MaxValue;
+
+            return Math.Abs((gridCell.WorldPosition - WorldPosition).magnitude);
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
+        }
+
+        public IGridCellViewModel BindDataModel(GridCellSave save, ITerrainVariant terrainVariant)
+        {
+            var rowIndex = save.RowIndex;
+            var colIndex = save.ColIndex;
+
+            name = $"row: {rowIndex}, col: {colIndex}";
+            transform.position = WorldPosition = GridCellHelpers.ToWorldCoords(rowIndex, colIndex);
+            Bounds = new Rect(transform.position.x - GridDefinitions.WidthRadius,
+                transform.position.z - GridDefinitions.HeightRadius,
+                GridDefinitions.WidthRadius * 2,
+                GridDefinitions.HeightRadius * 2);
+            TerrainType = save.TerrainType;
+            IsWalkable = terrainVariant.IsWalkable;
+            DaysTravelCost = terrainVariant.DaysTravelCost;
+            ColIndex = colIndex;
+            RowIndex = rowIndex;
+            return this;
         }
     }
 }

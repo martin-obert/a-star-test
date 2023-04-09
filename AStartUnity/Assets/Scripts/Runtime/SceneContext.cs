@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Runtime.Grid.Data;
+using Runtime.Grid.Services;
 
 namespace Runtime
 {
@@ -7,7 +8,7 @@ namespace Runtime
     {
         public int RowCount { get; set; }
         public int ColCount { get; set; }
-        public IGridCellViewModel[] Cells { get; set; }
+        public GridCellSave[] Cells { get; set; }
 
         public bool HasCells()
         {

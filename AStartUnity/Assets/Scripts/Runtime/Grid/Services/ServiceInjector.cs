@@ -40,7 +40,7 @@ namespace Runtime.Grid.Services
         public IAddressableManager AddressableManager => GetService<IAddressableManager>();
         public ISceneManagementService SceneManagementService => GetService<ISceneManagementService>();
         public IPrefabInstantiator PrefabInstantiator => GetService<IPrefabInstantiator>();
-        
+
         public IGridLayoutRepository GridLayoutRepository => GetService<IGridLayoutRepository>();
         public EventSubscriber EventSubscriber => GetService<EventSubscriber>();
 
@@ -71,15 +71,18 @@ namespace Runtime.Grid.Services
                 GetService<IAddressableManager>(c),
                 GetService<GameDefinitions>(c)
             ));
+            
+            RegisterService<IPrefabInstantiator>(c => new PrefabInstantiator(
+                c.GetService<IAddressableManager>()
+            ));
 
             RegisterService(gameDefinitions);
 
             RegisterService(new EventSubscriber());
-            RegisterService(new PrefabInstantiator());
             RegisterService(new EventPublisher());
 
             RegisterService<IGridLayoutRepository>(new GridLayoutRepository());
-            RegisterService<ISceneContextManager>(_ => new SceneContextManager());
+            RegisterService<ISceneContextManager>(new SceneContextManager());
 
             DontDestroyOnLoad(gameObject);
         }

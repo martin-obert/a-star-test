@@ -37,7 +37,7 @@ namespace Runtime
             await _addressableManager.LoadSceneAsync(_gameDefinitions.HexGridScene, token);
         }
 
-        public async UniTask LoadLayoutAsync(IGridCellViewModel[] cells, CancellationToken token = default)
+        public async UniTask LoadLayoutAsync(GridCellSave[] cells, CancellationToken token = default)
         {
             _sceneContextManager.SetContext(new SceneContext
             {
