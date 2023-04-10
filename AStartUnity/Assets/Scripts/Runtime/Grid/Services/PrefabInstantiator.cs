@@ -13,12 +13,10 @@ namespace Runtime.Grid.Services
             _addressableManager = addressableManager ?? throw new ArgumentNullException(nameof(addressableManager));
         }
 
-        public IGridCellViewModel InstantiateGridCellPresenter(GridCellSave save)
+        public void InstantiateGridCell(IGridCellViewModel viewModel)
         {
             var prefab = _addressableManager.GetCellPrefab();
-            var terrainVariant = _addressableManager.GetTerrainVariantByType(save.TerrainType);
-            return Object.Instantiate(prefab)
-                .BindDataModel(save, terrainVariant);
+            Object.Instantiate(prefab).SetViewModel(viewModel);
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Runtime.Grid.Services
     {
         private IGridCellViewModel _hoverCellViewModel;
         private readonly IPrefabInstantiator _prefabInstantiator;
+        private readonly IAddressableManager _addressableManager;
 
         public Rect Bounds { get; private set; }
 
@@ -29,8 +30,9 @@ namespace Runtime.Grid.Services
         private readonly PathfindingContext _pathfindingContext = new();
         private IGridCellViewModel[] _currentCells;
 
-        public GridService(IPrefabInstantiator prefabInstantiator)
+        public GridService(IPrefabInstantiator prefabInstantiator, IAddressableManager addressableManager)
         {
+            _addressableManager = addressableManager ?? throw new ArgumentNullException(nameof(addressableManager));
             _prefabInstantiator = prefabInstantiator ?? throw new ArgumentNullException(nameof(prefabInstantiator));
         }
 
@@ -60,7 +62,7 @@ namespace Runtime.Grid.Services
 
         public void CreateNewGrid(int rowCount, int colCount)
         {
-            var cells = GridGenerator.GenerateGrid(rowCount, colCount);
+            var cells = GridGenerator.GenerateGridCellDataModels(rowCount, colCount);
 
             InstantiateGrid(rowCount, colCount, cells);
         }
@@ -112,12 +114,17 @@ namespace Runtime.Grid.Services
             if (!cells.Any())
                 throw new InvalidOperationException("Sequence contains no elements. Empty cell array provided");
 
-            _currentCells = cells.Select(gridCell =>
-                {
-                    var presenter = _prefabInstantiator.InstantiateGridCellPresenter(gridCell);
-                    return presenter;
-                })
-                .ToArray();
+            _currentCells = new IGridCellViewModel[cells.Length];
+            for (var i = 0; i < _currentCells.Length && i < cells.Length; i++)
+            {
+                var x = cells[i];
+                var terrainType = _addressableManager.GetTerrainVariantByType(x.TerrainType);
+                var gridCellViewModel = new GridCellViewModel(x, terrainType);
+                
+                _prefabInstantiator.InstantiateGridCell(gridCellViewModel);
+                _currentCells[i] = gridCellViewModel;
+            }
+
             GridGenerator.PopulateNeighbours(_currentCells);
             SetBounds(rowCount, colCount);
         }

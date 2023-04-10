@@ -12,8 +12,7 @@ using UnityEngine;
 
 namespace Runtime.Grid.Presenters
 {
-    [RequireComponent(typeof(Renderer))]
-    public class GridCellPresenter : MonoBehaviour, IGridCellViewModel
+    public sealed class GridCellViewModel : IGridCellViewModel
     {
         private bool _isSelected;
         private bool _isHighlighted;
@@ -85,9 +84,9 @@ namespace Runtime.Grid.Presenters
 
         public bool IsOddRow => GridCellHelpers.IsCellOdd(RowIndex);
 
-        public Vector3 WorldPosition { get; private set; }
+        public Vector3 WorldPosition { get; set; }
 
-        public Rect Bounds { get; private set; }
+        public Rect Bounds { get; set; }
 
         public float HeightHalf { get; set; }
         public float WidthHalf { get; set; }
@@ -98,6 +97,7 @@ namespace Runtime.Grid.Presenters
         }
 
         public bool IsWalkable { get; set; }
+
         public TerrainType TerrainType { get; set; }
 
         public IEnumerable<IAStarNode> Neighbours { get; private set; }
@@ -140,23 +140,37 @@ namespace Runtime.Grid.Presenters
             return true;
         }
 
-        public IGridCellViewModel BindDataModel(GridCellSave save, ITerrainVariant terrainVariant)
+        public GridCellViewModel(GridCellSave save, ITerrainVariant terrainVariant)
         {
-            var rowIndex = save.RowIndex;
-            var colIndex = save.ColIndex;
-
-            name = $"row: {rowIndex}, col: {colIndex}";
-            transform.position = WorldPosition = GridCellHelpers.ToWorldCoords(rowIndex, colIndex);
-            Bounds = new Rect(transform.position.x - GridDefinitions.WidthRadius,
-                transform.position.z - GridDefinitions.HeightRadius,
-                GridDefinitions.WidthRadius * 2,
-                GridDefinitions.HeightRadius * 2);
-            TerrainType = save.TerrainType;
+            var worldPosition = GridCellHelpers.ToWorldCoords(save.RowIndex, save.ColIndex);
+            ColIndex = save.ColIndex;
+            RowIndex = save.RowIndex;
+            TerrainType = terrainVariant.Type;
             IsWalkable = terrainVariant.IsWalkable;
             DaysTravelCost = terrainVariant.DaysTravelCost;
-            ColIndex = colIndex;
-            RowIndex = rowIndex;
-            return this;
+            HeightHalf = GridDefinitions.HeightRadius;
+            WidthHalf = GridDefinitions.WidthRadius;
+            Bounds = new Rect(worldPosition.x - GridDefinitions.WidthRadius,
+                worldPosition.z - GridDefinitions.HeightRadius,
+                GridDefinitions.WidthRadius * 2,
+                GridDefinitions.HeightRadius * 2);
+            WorldPosition = worldPosition;
+        }
+    }
+
+    [RequireComponent(typeof(Renderer))]
+    public class GridCellFacade : MonoBehaviour
+    {
+        public IGridCellViewModel ViewModel { get; set; }
+
+        public void SetViewModel(IGridCellViewModel value)
+        {
+            if (ViewModel != null) throw new Exception("ViewModel already set");
+
+            ViewModel = value;
+
+            name = $"row: {value.RowIndex}, col: {value.ColIndex}";
+            transform.position = value.WorldPosition;
         }
     }
 }

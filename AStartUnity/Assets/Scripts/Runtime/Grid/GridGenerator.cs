@@ -29,7 +29,7 @@ namespace Runtime.Grid
 
     public static class GridGenerator
     {
-        public static GridCellSave[] GenerateGrid(int rowCount, int colCount)
+        public static GridCellSave[] GenerateGridCellDataModels(int rowCount, int colCount)
         {
             if (rowCount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(rowCount), rowCount, "must be greater than 0");
