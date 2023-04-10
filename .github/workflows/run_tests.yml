@@ -33,3 +33,4 @@ jobs:
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           projectPath: AStartUnity
+          allowDirtyBuild: true
