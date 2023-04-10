@@ -73,14 +73,6 @@ namespace Runtime.Grid.Presenters
         {
             var isBoxCastHit = cellViewModel.Bounds.Contains(cursor);
             return isBoxCastHit;
-            var position = cellViewModel.WorldPosition;
-            var v = cursor.y <= position.z + cellViewModel.HeightHalf &&
-                    cursor.y >= position.z - cellViewModel.HeightHalf;
-
-            var h = cursor.x <= position.x + cellViewModel.WidthHalf &&
-                    cursor.x >= position.x - cellViewModel.WidthHalf;
-
-            return v && h;
         }
 
         public static bool IsCircleCastHit(IGridCellViewModel cellViewModel, Vector2 cursor)
