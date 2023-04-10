@@ -12,7 +12,7 @@ namespace Runtime.Grid.Services
         UniTask DownloadDependenciesAsync(CancellationToken token = default);
         UniTask LoadSceneAsync(AssetReference world, CancellationToken token);
         ITerrainVariant[] GetTerrainVariants();
-        GridCellPresenter GetCellPrefab();
+        GridCellFacade GetCellPrefab();
 
         ITerrainVariant GetTerrainVariantByType(TerrainType terrainType);
 

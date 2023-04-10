@@ -7,7 +7,6 @@ using UnityEngine.Assertions;
 
 namespace Runtime.Grid.Services
 {
-    
     public sealed class GridManager : MonoBehaviour, IDisposable
     {
         [SerializeField] private int rowCount = 1;
@@ -26,7 +25,7 @@ namespace Runtime.Grid.Services
             Assert.IsTrue(colCount > 0, "colCount > 0");
 
             _mainCamera = new GridRaycastCamera(Camera.main);
-            
+
             Assert.IsNotNull(_mainCamera, "_mainCamera != null");
 
 
@@ -52,7 +51,6 @@ namespace Runtime.Grid.Services
                 await UseCases.GridInitialization(
                     context,
                     _gridService,
-                    ServiceInjector.Instance.AddressableManager,
                     ServiceInjector.Instance.EventPublisher
                 );
             });

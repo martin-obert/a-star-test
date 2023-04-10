@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using JetBrains.Annotations;
 using Runtime.Gameplay;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
-using Runtime.Inputs;
-using Runtime.Terrains;
 using UniRx;
 using UnityEngine;
-using Random = System.Random;
 
 [assembly: InternalsVisibleTo("Grid.Editor.Tests")]
 
@@ -20,7 +15,6 @@ namespace Runtime.Grid.Services
     internal sealed class GridService : IGridService, IDisposable
     {
         private IGridCellViewModel _hoverCellViewModel;
-        private readonly Random _random = new();
         private readonly IPrefabInstantiator _prefabInstantiator;
         private readonly IAddressableManager _addressableManager;
 
@@ -68,10 +62,11 @@ namespace Runtime.Grid.Services
 
         public void CreateNewGrid(int rowCount, int colCount)
         {
-            var cells = GridGenerator.GenerateGrid(rowCount, colCount, () => GetRandomTerrainVariant());
+            var cells = GridGenerator.GenerateGridCellDataModels(rowCount, colCount);
 
             InstantiateGrid(rowCount, colCount, cells);
         }
+
 
         public void SetBounds(int rowCount, int colCount)
         {
@@ -107,36 +102,31 @@ namespace Runtime.Grid.Services
             }
         }
 
-        public void InstantiateGrid(int rowCount, int colCount, IGridCellViewModel[] cells)
+        public void InstantiateGrid(int rowCount, int colCount, GridCellSave[] cells)
         {
             if (rowCount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(rowCount), rowCount, "must be greater than 0");
             if (colCount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(colCount), colCount, "must be greater than 0");
-            _currentCells = cells;
 
             if (cells == null) throw new ArgumentNullException(nameof(cells));
 
             if (!cells.Any())
                 throw new InvalidOperationException("Sequence contains no elements. Empty cell array provided");
 
-            GridGenerator.PopulateNeighbours(_currentCells);
-
-            foreach (var gridCell in _currentCells)
+            _currentCells = new IGridCellViewModel[cells.Length];
+            for (var i = 0; i < _currentCells.Length && i < cells.Length; i++)
             {
-                var terrainVariant = _addressableManager.GetTerrainVariantByType(gridCell.TerrainType);
-                var controller = _prefabInstantiator
-                    .InstantiateGridCellPresenter(gridCell);
-                controller.SetMainTexture(terrainVariant.TextureOverride);
+                var x = cells[i];
+                var terrainType = _addressableManager.GetTerrainVariantByType(x.TerrainType);
+                var gridCellViewModel = new GridCellViewModel(x, terrainType);
+                
+                _prefabInstantiator.InstantiateGridCell(gridCellViewModel);
+                _currentCells[i] = gridCellViewModel;
             }
 
+            GridGenerator.PopulateNeighbours(_currentCells);
             SetBounds(rowCount, colCount);
-        }
-
-        private ITerrainVariant GetRandomTerrainVariant()
-        {
-            var source = _addressableManager.GetTerrainVariants();
-            return source[_random.Next(0, source.Length)];
         }
     }
 }

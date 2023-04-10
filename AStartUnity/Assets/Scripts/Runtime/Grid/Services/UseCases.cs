@@ -9,13 +9,11 @@ namespace Runtime.Grid.Services
         public static async UniTask GridInitialization(
             SceneContext context,
             IGridService gridService,
-            IAddressableManager addressableManager,
             EventPublisher eventPublisher)
         {
             try
             {
                 await UniTask.SwitchToMainThread();
-                var terrainVariants = addressableManager.GetTerrainVariants();
                 if (!context.HasCells())
                 {
                     gridService.CreateNewGrid(context.RowCount, context.ColCount);

@@ -4,30 +4,51 @@ using System.Linq;
 using System.Threading.Tasks;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
+using Runtime.Grid.Services;
 using Runtime.Terrains;
 
 namespace Runtime.Grid
 {
+    public static class TerrainTypeHelpers
+    {
+        private static readonly Random Random = new();
+
+        static TerrainTypeHelpers()
+        {
+            Types = Enum.GetValues(typeof(TerrainType)).OfType<TerrainType>().Where(x => x != TerrainType.Unknown)
+                .ToArray();
+        }
+
+        private static TerrainType[] Types { get; }
+
+        public static TerrainType GetRandomTerrainType()
+        {
+            return Types[Random.Next(0, Types.Length)];
+        }
+    }
+
     public static class GridGenerator
     {
-        public static IGridCellViewModel[] GenerateGrid(int rowCount, int colCount, Func<ITerrainVariant> getRandomTerrainVariant)
+        public static GridCellSave[] GenerateGridCellDataModels(int rowCount, int colCount)
         {
-            if (rowCount <= 0) throw new ArgumentOutOfRangeException(nameof(rowCount), rowCount, "must be greater than 0");
-            if (colCount <= 0) throw new ArgumentOutOfRangeException(nameof(colCount), colCount, "must be greater than 0");
-            if (getRandomTerrainVariant == null) throw new ArgumentNullException(nameof(getRandomTerrainVariant));
-            
-            var result = new IGridCellViewModel[rowCount * colCount];
+            if (rowCount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(rowCount), rowCount, "must be greater than 0");
+            if (colCount <= 0)
+                throw new ArgumentOutOfRangeException(nameof(colCount), colCount, "must be greater than 0");
 
-            Parallel.For(0, rowCount, row =>
-            {
-                Parallel.For(0, colCount, col =>
+            var result = new GridCellSave[rowCount * colCount];
+            Parallel.For(0, rowCount,
+                row =>
                 {
-                    var terrainVariant = getRandomTerrainVariant();
-                    result[row * colCount + col] = GridCellFactory.Create(row, col, terrainVariant);
+                    Parallel.For(0, colCount,
+                        col =>
+                        {
+                            result[row * colCount + col] =
+                                GridCellFactory.Create(row, col, TerrainTypeHelpers.GetRandomTerrainType());
+                        });
                 });
-            });
 
-           
+
             return result;
         }
 
@@ -38,10 +59,10 @@ namespace Runtime.Grid
                 var neighbours = CollectNeighbours(gridCell, grid);
                 gridCell.SetNeighbours(neighbours);
             });
-
         }
 
-        public static IEnumerable<IGridCellViewModel> CollectNeighbours(IGridCellViewModel currentCellViewModel, IGridCellViewModel[] grid)
+        public static IEnumerable<IGridCellViewModel> CollectNeighbours(IGridCellViewModel currentCellViewModel,
+            IGridCellViewModel[] grid)
         {
             var shift = currentCellViewModel.IsOddRow ? 0 : -1;
             var result = new[]

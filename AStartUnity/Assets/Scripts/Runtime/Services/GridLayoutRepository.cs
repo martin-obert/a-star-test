@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using Runtime.Grid.Data;
@@ -31,7 +32,7 @@ namespace Runtime.Services
             return Directory.GetFiles(filepath, "*.json");
         }
 
-        public  async UniTask<IGridCellViewModel[]> LoadAsync(string filename, ITerrainVariant[] terrainVariants,
+        public  async Task<GridCellSave[]> LoadAsync(string filename, ITerrainVariant[] terrainVariants,
             CancellationToken token = default)
         {
             var fullPath = Path.Combine(GetFilepath(), filename);
@@ -42,7 +43,7 @@ namespace Runtime.Services
             var json = await File.ReadAllTextAsync(fullPath, token);
             var data = JsonConvert.DeserializeObject<GridCellSave[]>(json);
 
-            return data.Select(x => GridCellMapper.GridCellFromSave(x, terrainVariants)).ToArray();
+            return data.ToArray();
         }
 
 

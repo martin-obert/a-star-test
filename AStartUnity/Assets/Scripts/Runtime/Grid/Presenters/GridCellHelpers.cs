@@ -71,6 +71,8 @@ namespace Runtime.Grid.Presenters
 
         public static bool IsBoxCastHit(IGridCellViewModel cellViewModel, Vector2 cursor)
         {
+            var isBoxCastHit = cellViewModel.Bounds.Contains(cursor);
+            return isBoxCastHit;
             var position = cellViewModel.WorldPosition;
             var v = cursor.y <= position.z + cellViewModel.HeightHalf &&
                     cursor.y >= position.z - cellViewModel.HeightHalf;

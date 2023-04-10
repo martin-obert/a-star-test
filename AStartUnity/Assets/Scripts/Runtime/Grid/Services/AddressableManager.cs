@@ -17,7 +17,7 @@ namespace Runtime.Grid.Services
         private readonly GameDefinitions _gameDefinitions;
         private readonly ITerrainVariant[] _terrainVariants;
         private AsyncOperationHandle<GameObject> _handle;
-        private GridCellPresenter _cell;
+        private GridCellFacade _cell;
 
         public AddressableManager(GameDefinitions gameDefinitions, ITerrainVariant[] terrainVariants)
         {
@@ -39,7 +39,7 @@ namespace Runtime.Grid.Services
 
             _handle = _gameDefinitions.HexTile.LoadAssetAsync<GameObject>();
             var result = await _handle.WithCancellation(token);
-            _cell = result.GetComponent<GridCellPresenter>();
+            _cell = result.GetComponent<GridCellFacade>();
         }
 
         public UniTask<long> GetDownloadSizeAsync(CancellationToken token = default)
@@ -58,7 +58,7 @@ namespace Runtime.Grid.Services
             return _terrainVariants;
         }
 
-        public GridCellPresenter GetCellPrefab()
+        public GridCellFacade GetCellPrefab()
         {
             return _cell;
         }
