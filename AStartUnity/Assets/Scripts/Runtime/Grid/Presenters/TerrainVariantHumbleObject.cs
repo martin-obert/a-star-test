@@ -51,7 +51,7 @@ namespace Runtime.Grid.Presenters
                     case nameof(IGridCellViewModel.IsPinned):
                     case nameof(IGridCellViewModel.IsHighlighted):
                     {
-                        _terrainVariantRenderer.SetIsHighlighted(cell.IsHighlighted);
+                        _terrainVariantRenderer.SetIsHighlighted(cell.IsHighlighted || cell.IsPinned);
                         return;
                     }
                     case nameof(IGridCellViewModel.IsSelected):
