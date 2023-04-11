@@ -22,6 +22,7 @@ namespace Tests
         {
             var terrainVariantMock = new Mock<ITerrainVariant>();
             terrainVariantMock.SetupGet(x => x.IsWalkable).Returns(true);
+            terrainVariantMock.SetupGet(x => x.Type).Returns(TerrainType.Grass);
 
             var configurationMock = new Mock<GridCellTransformWrapper.Configuration>();
             configurationMock.SetupGet(x => x.LiftAmount).Returns(1);
@@ -31,12 +32,13 @@ namespace Tests
                 new TestCaseData(terrainVariantMock.Object, configurationMock.Object)
             };
         }
-        
-        
+
+
         public static IEnumerable<TestCaseData> Controller_NonWalkableTerrainCaseSource()
         {
             var terrainVariantMock = new Mock<ITerrainVariant>();
             terrainVariantMock.SetupGet(x => x.IsWalkable).Returns(false);
+            terrainVariantMock.SetupGet(x => x.Type).Returns(TerrainType.Grass);
 
             var configurationMock = new Mock<GridCellTransformWrapper.Configuration>();
             configurationMock.SetupGet(x => x.LiftAmount).Returns(1);
@@ -61,7 +63,7 @@ namespace Tests
 
 
             IGridCellViewModel viewModelMock =
-                new GridCellViewModel(new GridCellSave(), terrainVariant);
+                new GridCellViewModel(new GridCellSave { TerrainType = TerrainType.Mountain }, terrainVariant);
 
             var controller = new GridCellTransformWrapper.Controller(viewModelMock, transformMock.Object,
                 configuration);
@@ -96,7 +98,7 @@ namespace Tests
 
 
             IGridCellViewModel viewModelMock =
-                new GridCellViewModel(new GridCellSave(), terrainVariant);
+                new GridCellViewModel(new GridCellSave{TerrainType = TerrainType.Grass}, terrainVariant);
 
             var controller = new GridCellTransformWrapper.Controller(viewModelMock, transformMock.Object,
                 configuration);
@@ -113,8 +115,7 @@ namespace Tests
 
             controller.Dispose();
         }
-        
-        
+
 
         [TestCaseSource(nameof(Controller_PassCaseSource))]
         public void Controller_IsPinned_Pass(
@@ -130,7 +131,7 @@ namespace Tests
 
 
             IGridCellViewModel viewModelMock =
-                new GridCellViewModel(new GridCellSave(), terrainVariant);
+                new GridCellViewModel(new GridCellSave { TerrainType = TerrainType.Mountain }, terrainVariant);
 
             var controller = new GridCellTransformWrapper.Controller(viewModelMock, transformMock.Object,
                 configuration);
@@ -162,7 +163,7 @@ namespace Tests
 
 
             IGridCellViewModel viewModelMock =
-                new GridCellViewModel(new GridCellSave(), terrainVariant);
+                new GridCellViewModel(new GridCellSave{TerrainType = TerrainType.Grass}, terrainVariant);
 
             var controller = new GridCellTransformWrapper.Controller(viewModelMock, transformMock.Object,
                 configuration);
@@ -178,11 +179,10 @@ namespace Tests
             AssertHasLanded(position);
 
             controller.Dispose();
-            
+
             viewModelMock.TogglePinned(true);
             controller.Update(1);
             AssertHasLanded(position);
-
         }
 
         [TestCaseSource(nameof(Controller_NonWalkableTerrainCaseSource))]
@@ -199,7 +199,7 @@ namespace Tests
 
 
             IGridCellViewModel viewModelMock =
-                new GridCellViewModel(new GridCellSave(), terrainVariant);
+                new GridCellViewModel(new GridCellSave { TerrainType = TerrainType.Grass }, terrainVariant);
 
             var controller = new GridCellTransformWrapper.Controller(viewModelMock, transformMock.Object,
                 configuration);
@@ -231,11 +231,10 @@ namespace Tests
             AssertHasLanded(position);
 
             controller.Dispose();
-            
+
             viewModelMock.TogglePinned(true);
             controller.Update(1);
             AssertHasLanded(position);
-
         }
 
         private static void AssertIsLifted(Vector3 position, float liftAmount)

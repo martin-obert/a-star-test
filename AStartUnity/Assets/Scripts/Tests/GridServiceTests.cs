@@ -48,7 +48,7 @@ namespace Tests
         {
             var gridService = new GridService(_prefabInstantiatorMock.Object, _addressableManagerMock.Object);
 
-            gridService.InstantiateGrid(1, 1, new[] { new GridCellSave() });
+            gridService.InstantiateGrid(1, 1, new[] { new GridCellSave { TerrainType = TerrainType.Grass } });
 
             Assert.That(gridService.Cells, Has.Length.EqualTo(1));
 
@@ -94,11 +94,10 @@ namespace Tests
 
             var gridService = new GridService(_prefabInstantiatorMock.Object, _addressableManagerMock.Object);
 
-            gridService.InstantiateGrid(1, 1, new[] { new GridCellSave() });
+            gridService.InstantiateGrid(1, 1, new[] { new GridCellSave { TerrainType = TerrainType.Grass } });
             gridService.UpdateHoveringCell(camera.Object, Vector2.one);
 
             Assert.IsTrue(gridService.Cells.First().IsHighlighted, "IsHighlighted");
         }
-
     }
 }
