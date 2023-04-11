@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Tests
 {
-    public class TerrainRendererTests
+    public class GridCellRendererTests
     {
         private Mock<IAddressableManager> _addressableManagerMock;
 
@@ -19,9 +19,9 @@ namespace Tests
             _addressableManagerMock.Setup(x => x.GetTerrainVariantByType(It.IsAny<TerrainType>()))
                 .Returns(() => terrainVariantMock.Object);
         }
-        
+
         [Test]
-        public void TerrainVariantController_Pass()
+        public void Controller_Pass()
         {
             var viewModelMock = new GridCellViewModel(new GridCellSave(), new Mock<ITerrainVariant>().Object);
             var terrainVariantRendererMock = new Mock<IGridCellRenderer>();
@@ -32,10 +32,10 @@ namespace Tests
                 terrainVariantRendererMock.Object);
 
             controller.Initialize();
-            
+
             terrainVariantRendererMock.Verify(x =>
                 x.SetMainTexture(It.IsAny<Texture>()), Times.Once);
-            
+
             viewModelMock.ToggleHighlighted(true);
             viewModelMock.TogglePinned(true);
 

@@ -12,24 +12,24 @@ namespace Runtime.Grid.Presenters
         public class Controller : IDisposable
         {
             private readonly IGridCellViewModel _viewModel;
-            private readonly Transform _transform;
+            private readonly IGridCellTransform _transform;
             private Vector3 _initialPosition;
             private Vector3 _liftedPosition;
             private bool _isLifted;
             private float _liftAmount;
             private readonly Configuration _configuration;
 
-            public Controller(IGridCellViewModel viewModel, Transform transform, Configuration configuration)
+            public Controller(IGridCellViewModel viewModel, IGridCellTransform transform, Configuration configuration)
             {
                 _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
-                _transform = transform ? transform : throw new ArgumentNullException(nameof(transform));
+                _transform = transform ?? throw new ArgumentNullException(nameof(transform));
                 _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             }
 
             public void Initialize()
             {
                 _viewModel.PropertyChanged += ViewModelOnPropertyChanged;
-                var position = _transform.position;
+                var position = _transform.Position;
                 _initialPosition = position;
                 _liftedPosition = position + Vector3.up * _configuration.LiftAmount;
             }
@@ -55,7 +55,7 @@ namespace Runtime.Grid.Presenters
                 _liftAmount = _isLifted
                     ? Mathf.Clamp01(_liftAmount + deltaTime)
                     : Mathf.Clamp01(_liftAmount - deltaTime);
-                _transform.position = Vector3.Lerp(_initialPosition, _liftedPosition, _liftAmount);
+                _transform.Position = Vector3.Lerp(_initialPosition, _liftedPosition, _liftAmount);
             }
 
             public void Dispose()
@@ -69,7 +69,7 @@ namespace Runtime.Grid.Presenters
         {
             [SerializeField] private float liftAmount;
 
-            public float LiftAmount => liftAmount;
+            public virtual float LiftAmount => liftAmount;
         }
 
         private Animator _animator;
@@ -85,7 +85,7 @@ namespace Runtime.Grid.Presenters
 
         private void Start()
         {
-            _controller = new Controller(facade.ViewModel, transform, componentConfiguration);
+            _controller = new Controller(facade.ViewModel, new GridCellTransform(transform), componentConfiguration);
             _controller.Initialize();
         }
 
