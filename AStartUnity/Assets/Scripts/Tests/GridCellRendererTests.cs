@@ -17,6 +17,7 @@ namespace Tests
             _addressableManagerMock = new Mock<IAddressableManager>();
             var terrainVariantMock = new Mock<ITerrainVariant>();
             terrainVariantMock.SetupGet(x => x.Type).Returns(TerrainType.Desert);
+
             _addressableManagerMock.Setup(x => x.GetTerrainVariantByType(It.IsAny<TerrainType>()))
                 .Returns(() => terrainVariantMock.Object);
         }
@@ -25,6 +26,7 @@ namespace Tests
         public void Controller_Pass()
         {
             var viewModelMock = new GridCellViewModel(new GridCellSave{TerrainType = TerrainType.Desert}, new Mock<ITerrainVariant>().Object);
+
             var terrainVariantRendererMock = new Mock<IGridCellRenderer>();
 
             var controller = new GridCellRendererWrapper.Controller(
