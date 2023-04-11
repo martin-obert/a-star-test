@@ -24,9 +24,9 @@ namespace Tests
         public void TerrainVariantController_Pass()
         {
             var viewModelMock = new GridCellViewModel(new GridCellSave(), new Mock<ITerrainVariant>().Object);
-            var terrainVariantRendererMock = new Mock<ITerrainVariantRenderer>();
+            var terrainVariantRendererMock = new Mock<IGridCellRenderer>();
 
-            var controller = new TerrainVariantHumbleObject.Controller(
+            var controller = new GridCellRendererWrapper.Controller(
                 viewModelMock,
                 _addressableManagerMock.Object,
                 terrainVariantRendererMock.Object);

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Runtime.Grid.Presenters
 {
-    public sealed class TerrainVariantRenderer : ITerrainVariantRenderer
+    public sealed class GridCellRenderer : IGridCellRenderer
     {
         public static readonly int IsHovered = Shader.PropertyToID("_Is_Hovered");
         public static readonly int IsSelected = Shader.PropertyToID("_Is_Selected");
@@ -11,8 +11,8 @@ namespace Runtime.Grid.Presenters
 
         private readonly MaterialPropertyBlock _materialPropertyBlock;
         private readonly Renderer _renderer;
-
-        public TerrainVariantRenderer(Renderer renderer, MaterialPropertyBlock materialPropertyBlock = null)
+        
+        public GridCellRenderer(Renderer renderer, MaterialPropertyBlock materialPropertyBlock = null)
         {
             _renderer = renderer ? renderer : throw new ArgumentNullException(nameof(renderer));
             _materialPropertyBlock = materialPropertyBlock ?? new MaterialPropertyBlock();
