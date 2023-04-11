@@ -63,7 +63,6 @@ namespace Runtime.Grid.Services
         public void CreateNewGrid(int rowCount, int colCount)
         {
             var cells = GridGenerator.GenerateGridCellDataModels(rowCount, colCount);
-
             InstantiateGrid(rowCount, colCount, cells);
         }
 
@@ -117,9 +116,12 @@ namespace Runtime.Grid.Services
             _currentCells = new IGridCellViewModel[cells.Length];
             for (var i = 0; i < _currentCells.Length && i < cells.Length; i++)
             {
-                var x = cells[i];
-                var terrainType = _addressableManager.GetTerrainVariantByType(x.TerrainType);
-                var gridCellViewModel = new GridCellViewModel(x, terrainType);
+                var cell = cells[i];
+                
+                ThrowHelpers.ValidateGridCellDataOrThrow(cell);
+                
+                var terrainType = _addressableManager.GetTerrainVariantByType(cell.TerrainType);
+                var gridCellViewModel = new GridCellViewModel(cell, terrainType);
                 
                 _prefabInstantiator.InstantiateGridCell(gridCellViewModel);
                 _currentCells[i] = gridCellViewModel;

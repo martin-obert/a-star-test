@@ -7,5 +7,6 @@ namespace Runtime.Grid.Services
         public int ColIndex { get; set; }
         public int RowIndex { get; set; }
         public TerrainType TerrainType { get; set; }
+
     }
 }
