@@ -142,6 +142,9 @@ namespace Runtime.Grid.Presenters
 
         public GridCellViewModel(GridCellSave save, ITerrainVariant terrainVariant)
         {
+            if (save.TerrainType == TerrainType.Unknown)
+                throw new ArgumentOutOfRangeException(nameof(save.TerrainType), save.TerrainType, "Terrain type not supported");
+            
             var worldPosition = GridCellHelpers.ToWorldCoords(save.RowIndex, save.ColIndex);
             ColIndex = save.ColIndex;
             RowIndex = save.RowIndex;
