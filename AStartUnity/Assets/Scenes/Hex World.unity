@@ -470,8 +470,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rowCount: 100
   colCount: 100
-  autoGenerateGridOnStart: 1
-  gridCellRepository: {fileID: 11400000, guid: 032d4be40dfe44a4594140af12848435, type: 2}
+  _terrains:
+  - terrainTypes: 020000000200000003000000
+  - terrainTypes: 050000000400000003000000
+  - terrainTypes: 010000000100000003000000
 --- !u!4 &1413932542
 Transform:
   m_ObjectHideFlags: 0

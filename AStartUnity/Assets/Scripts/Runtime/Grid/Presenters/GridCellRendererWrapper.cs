@@ -9,26 +9,25 @@ using UnityEngine.Assertions;
 namespace Runtime.Grid.Presenters
 {
     [RequireComponent(typeof(Renderer))]
-    public class TerrainVariantHumbleObject : MonoBehaviour
+    public class GridCellRendererWrapper : MonoBehaviour
     {
         public sealed class Controller : IDisposable
         {
-            private readonly ITerrainVariantRenderer _terrainVariantRenderer;
-            private readonly Renderer _renderer;
+            private readonly IGridCellRenderer _gridCellRenderer;
             private readonly IAddressableManager _addressableManager;
             private readonly IGridCellViewModel _viewModel;
-
+            
             public Controller(
                 IGridCellViewModel viewModel,
                 IAddressableManager addressableManager,
-                ITerrainVariantRenderer terrainVariantRenderer)
+                IGridCellRenderer gridCellRenderer)
             {
                 _addressableManager = addressableManager ?? throw new ArgumentNullException(nameof(addressableManager));
                 
                 _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
                 
-                _terrainVariantRenderer = terrainVariantRenderer ??
-                                          throw new ArgumentNullException(nameof(terrainVariantRenderer));
+                _gridCellRenderer = gridCellRenderer ??
+                                          throw new ArgumentNullException(nameof(gridCellRenderer));
             }
 
             public void Initialize()
@@ -51,12 +50,13 @@ namespace Runtime.Grid.Presenters
                     case nameof(IGridCellViewModel.IsPinned):
                     case nameof(IGridCellViewModel.IsHighlighted):
                     {
-                        _terrainVariantRenderer.SetIsHighlighted(cell.IsHighlighted || cell.IsPinned);
+                        var cellIsHighlighted = cell.IsHighlighted || cell.IsPinned;
+                        _gridCellRenderer.SetIsHighlighted(cellIsHighlighted);
                         return;
                     }
                     case nameof(IGridCellViewModel.IsSelected):
                     {
-                        _terrainVariantRenderer.SetIsSelected(cell.IsSelected);
+                        _gridCellRenderer.SetIsSelected(cell.IsSelected);
                         return;
                     }
                     case nameof(IGridCellViewModel.TerrainType):
@@ -70,7 +70,7 @@ namespace Runtime.Grid.Presenters
             private void SetMainTexture(TerrainType terrainType)
             {
                 var terrainVariant = _addressableManager.GetTerrainVariantByType(terrainType);
-                _terrainVariantRenderer.SetMainTexture(terrainVariant.TextureOverride);
+                _gridCellRenderer.SetMainTexture(terrainVariant.TextureOverride);
             }
         }
 
@@ -96,7 +96,8 @@ namespace Runtime.Grid.Presenters
             Assert.IsNotNull(facade.ViewModel, "facade.ViewModel != null");
 
             _controller = new Controller(facade.ViewModel, _addressableManager,
-                new TerrainVariantRenderer(_rendererComponent));
+                new GridCellRenderer(_rendererComponent));
+            
             _controller.Initialize();
         }
 

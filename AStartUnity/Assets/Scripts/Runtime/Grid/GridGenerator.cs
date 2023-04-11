@@ -5,28 +5,9 @@ using System.Threading.Tasks;
 using Runtime.Grid.Data;
 using Runtime.Grid.Presenters;
 using Runtime.Grid.Services;
-using Runtime.Terrains;
 
 namespace Runtime.Grid
 {
-    public static class TerrainTypeHelpers
-    {
-        private static readonly Random Random = new();
-
-        static TerrainTypeHelpers()
-        {
-            Types = Enum.GetValues(typeof(TerrainType)).OfType<TerrainType>().Where(x => x != TerrainType.Unknown)
-                .ToArray();
-        }
-
-        private static TerrainType[] Types { get; }
-
-        public static TerrainType GetRandomTerrainType()
-        {
-            return Types[Random.Next(0, Types.Length)];
-        }
-    }
-
     public static class GridGenerator
     {
         public static GridCellSave[] GenerateGridCellDataModels(int rowCount, int colCount)
