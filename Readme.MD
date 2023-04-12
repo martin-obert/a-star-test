@@ -52,7 +52,25 @@ Therefore the MVVM pattern seems most suitable for this situation:
 - **View**
  - consists of Unity Components that observe the View Model and reflects the changes
  - this could be for ex: renderer that changes tint of a cell if selected or hovered
- 
+
+### Grid
+Grid knows about its cells on the business layer, so it can call methods exposed by the interface.
+Injects itself into the DI at **Awake** so it's only available when instantiated in **Hex World** scene.
+
+### Terrain
+Terrain exposes:
+- travel costs
+- texture for visuals
+- is walkable flag, to ensure we don't trespass the water for instance
+
+### User input and camera movement
+Allows player to hover over cells and select start/destination cell.
+Camera movement is cliped within the grid bounds.
+
+### Testing and Moq framework
+- added Moq dlls for stubing necessary objects used in test cases
+- test are written for most important features like the AStar alg or grid creation
+
 ### Humble Object Pattern
 is used to separate the actual logic that has to be tested within objects derived from the MonoBehaviours (Components)
 See for ex: 
@@ -68,6 +86,10 @@ See:
 
 For parts that would have logic executed each update I would use direct reference of some sort of other reactive pattern.
 
+### Repository Pattern
+Introduced for all data, that has to be pulled out either from scriptable objects, addressables or file system.
+Only knows about the data layer. Repositories then can be simply stubed, when we want to use them in tests.
+
 ### Entry scene
 - should include minimum of assets, purpose is to have small starting scene (splash screen) that would keep player entertained and executes pre-load logic, like loading addressable on the background
 - this will reduce the load time of an app (if all other resources are bundled)
@@ -75,18 +97,6 @@ For parts that would have logic executed each update I would use direct referenc
 
 ### Dependency Inejction
 - this might be my personal issue with static singletons, but DI allowed me to mock 
-
-### Testing and Moq framework
-- added Moq dlls for stubing necessary objects used in test cases
-- test are written for most important features like the AStar alg or grid creation
-
-### Grid
-Grid knows about its cells on the business layer, so it can call methods exposed by the interface.
-Injects itself into the DI at **Awake** so it's only available when instantiated in **Hex World** scene.
-
-### User input and camera movement
-Allows player to hover over cells and select start/destination cell.
-Camera movement is cliped within the grid bounds.
 
 ## Phase 1 - Prototype
 
