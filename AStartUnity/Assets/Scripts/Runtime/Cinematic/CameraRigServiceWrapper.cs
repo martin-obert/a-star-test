@@ -1,23 +1,26 @@
 ﻿using System;
 using Runtime.Grid.Services;
 using Runtime.Inputs;
-using Runtime.Messaging;
-using Runtime.Services;
 using UniRx;
 using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace Runtime.Cinematic
 {
+    /// <summary>
+    /// Humble object that wraps around <see cref="CameraRigService"/> and hooks up to
+    /// Unity API via <see cref="MonoBehaviour"/> lifecycles.
+    /// </summary>
     [RequireComponent(typeof(Camera))]
-    public sealed class CameraRigManager : MonoBehaviour
+    public sealed class CameraRigServiceWrapper : MonoBehaviour
     {
         [SerializeField] private float cameraSpeed = 1;
         [SerializeField] private Transform root;
 
-        private readonly CameraRigService _cameraRigService = new();
+        private CameraRigService _cameraRigService;
         private IUserInputService _userInputService;
         private IGridService _gridService;
+
         private void Awake()
         {
             Assert.IsNotNull(root, "root != null");
@@ -27,20 +30,18 @@ namespace Runtime.Cinematic
         {
             _gridService = ServiceInjector.Instance.GridService;
             _userInputService = ServiceInjector.Instance.UserInputService;
-
-            ServiceInjector.Instance.EventSubscriber
-                .OnGridInstantiated()
-                .Where(_ => _gridService != null)
-                .Subscribe(_ =>
-                {
-                    var center = _gridService.Center;
-                    root.transform.position = new Vector3(center.x, 0, center.y);
-                }).AddTo(this);
+            _cameraRigService = new CameraRigService(_gridService, _userInputService, root);
+           _cameraRigService.Initialize( ServiceInjector.Instance.EventSubscriber);
         }
 
         private void Update()
         {
-            _cameraRigService.UpdatePosition(root, cameraSpeed, _userInputService.AxisMovementVector, _gridService.IsPointOnGrid);
+            _cameraRigService?.UpdatePosition(cameraSpeed);
+        }
+
+        private void OnDestroy()
+        {
+            _cameraRigService?.Dispose();
         }
     }
 }

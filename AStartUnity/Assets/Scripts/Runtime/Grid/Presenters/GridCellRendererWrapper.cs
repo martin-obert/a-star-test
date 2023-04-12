@@ -34,6 +34,7 @@ namespace Runtime.Grid.Presenters
             {
                 _viewModel.PropertyChanged += CellOnPropertyChanged;
                 SetMainTexture(_viewModel.TerrainType);
+                _gridCellRenderer.SetIsWalkable(_viewModel.IsWalkable);
             }
 
             public void Dispose()

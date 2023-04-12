@@ -32,6 +32,8 @@ namespace Tests
                 new TestCaseData(terrainVariantMock.Object, configurationMock.Object)
             };
         }
+
+
         public static IEnumerable<TestCaseData> Controller_NonWalkableTerrainCaseSource()
         {
             var terrainVariantMock = new Mock<ITerrainVariant>();
@@ -114,6 +116,7 @@ namespace Tests
             controller.Dispose();
         }
 
+
         [TestCaseSource(nameof(Controller_PassCaseSource))]
         public void Controller_IsPinned_Pass(
             ITerrainVariant terrainVariant,
@@ -176,7 +179,7 @@ namespace Tests
             AssertHasLanded(position);
 
             controller.Dispose();
-            
+
             viewModelMock.TogglePinned(true);
             controller.Update(1);
             AssertHasLanded(position);
@@ -228,7 +231,7 @@ namespace Tests
             AssertHasLanded(position);
 
             controller.Dispose();
-            
+
             viewModelMock.TogglePinned(true);
             controller.Update(1);
             AssertHasLanded(position);
