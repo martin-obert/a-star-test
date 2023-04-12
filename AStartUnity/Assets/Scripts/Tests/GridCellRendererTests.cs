@@ -16,7 +16,6 @@ namespace Tests
         {
             _addressableManagerMock = new Mock<IAddressableManager>();
             var terrainVariantMock = new Mock<ITerrainVariant>();
-            terrainVariantMock.SetupGet(x => x.Type).Returns(TerrainType.Desert);
             _addressableManagerMock.Setup(x => x.GetTerrainVariantByType(It.IsAny<TerrainType>()))
                 .Returns(() => terrainVariantMock.Object);
         }
