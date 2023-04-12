@@ -13,9 +13,9 @@ I've managed to lift most of the heavy logic to the thread pool and don't block 
 I've added post-processing (URP) and custom shader (via Shader Graph) to expose some configuration via editor, like tint color, in more natural way than just some script variable.
 The MVVM pattern (mentioned below) allows to expose functionality of the Grid Cell to editor and split responsibility for rendering, animations etc. into individual components, that would listen to the view model changes.
 
-Addressables are just for swag, there is literally no need to add them right now and to be honest I think that excluding them would make this easier, but hey, thats me. The issue with them is, that they need to pre-load or load async at startup which requires all other logic to hold. Also see **Entry scene** below
+Addressables are just for swag, there is literally no need to add them right now and to be honest I think that excluding them would make this easier, but hey, thats me. The issue with them is, that they need to pre-load or load async at startup which requires all other logic to hold. Also see **Entry scene** below which serves as splash screen.
 
-The next improvement of this project would be some sort of a queue for instancing the cells which now happens in foreach loop and blocks the UI thread effectivly.
+The next improvement of this project would be some sort of a queue for instancing the cells which now happens in foreach loop and blocks the UI thread effectively.
 
 # About the project
 
@@ -53,13 +53,13 @@ Therefore the MVVM pattern seems most suitable for this situation:
  - consists of Unity Components that observe the View Model and reflects the changes
  - this could be for ex: renderer that changes tint of a cell if selected or hovered
  
-**Humble Object Pattern** 
+### Humble Object Pattern
 is used to separate the actual logic that has to be tested within objects derived from the MonoBehaviours (Components)
 See for ex: 
 - [GridCellRenderer](AStartUnity/Assets/Scripts/Runtime/Grid/Presenters/GridCellRenderer.cs)
 - [GridCellRendererWrapper](AStartUnity/Assets/Scripts/Runtime/Grid/Presenters/GridCellRendererWrapper.cs)
 
-**MVVM**
+### MVVM
 only for the cells which are defined as static and doesn't require regular tick per-instance.
 
 See: 
@@ -68,16 +68,23 @@ See:
 
 For parts that would have logic executed each update I would use direct reference of some sort of other reactive pattern.
 
-**Entry scene**
+### Entry scene
 - should include minimum of assets, purpose is to have small starting scene (splash screen) that would keep player entertained and executes pre-load logic, like loading addressable on the background
 - this will reduce the load time of an app (if all other resources are bundled)
 - Personal note: I do this almost in every of my Unity project.
 
+### Dependency Inejction
+- this might be my personal issue with static singletons, but DI allowed me to mock 
 
-## Grid
+### Testing and Moq framework
+- added Moq dlls for stubing necessary objects used in test cases
+- test are written for most important features like the AStar alg or grid creation
+
+### Grid
 Grid knows about its cells on the business layer, so it can call methods exposed by the interface.
+Injects itself into the DI at **Awake** so it's only available when instantiated in **Hex World** scene.
 
-## User input and camera movement
+### User input and camera movement
 Allows player to hover over cells and select start/destination cell.
 Camera movement is cliped within the grid bounds.
 
@@ -87,7 +94,6 @@ Camera movement is cliped within the grid bounds.
 - implement hover + select functionality
 - implement camera movement
 - implemnet MVVM pattern over cells
-
 
 ### Phase 2 - Improvements to next phase
 
