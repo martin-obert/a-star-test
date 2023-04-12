@@ -49,9 +49,12 @@ jobs:
       # Output
       - name: Zip build
         run: |
-          zip -r WinX64_build.zip build
+          zip -r StandaloneWindows64.zip build/StandaloneWindows64
+          zip -r Addressables.zip AStartUnity/ServerData
       
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: WinX64_build.zip
+          files: |
+            StandaloneWindows64.zip
+            Addressables.zip
