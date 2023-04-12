@@ -7,5 +7,6 @@ namespace Runtime.Grid.Presenters
         void SetIsHighlighted(bool value);
         void SetIsSelected(bool value);
         void SetMainTexture(Texture texture);
+        void SetIsWalkable(bool value);
     }
 }
