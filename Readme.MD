@@ -6,11 +6,11 @@
 - mouse left button to select start/destination cell
 
 ## Personal conclusion
-This was really nice exercise, where I could finally dig deeper into proper testing. I went to prototype first rather than TDD, since there was some sort of visual output for this.
+This was really nice exercise, where I could finally dig deeper into proper testing. I went to prototype first rather than [Test Driven Development](https://en.wikipedia.org/wiki/Test-driven_development) (TDD), since there was some sort of visual output for this.
 In the end I think TDD approach could help me discover most of the flaws with design, like the Humble Objects were introduced almost at the end where I've tried to test the MonoBehavs directly.
 I've managed to lift most of the heavy logic to the thread pool and don't block the main UI thread. See: [ParalelFor](https://github.com/martin-obert/a-star-test/blob/35e579da3461ad2d9f75ea1712991ccbf3a377c0/AStartUnity/Assets/Scripts/Runtime/Grid/GridGenerator.cs#L21)
 
-I've added post-processing (URP) and custom shader (via Shader Graph) to expose some configuration via editor, like tint color, in more natural way than just some script variable.
+I've added post-processing from [Universal Rendering Pipeline](https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@16.0/manual/index.html) (URP) package and custom shader (via Shader Graph) to expose some configuration via editor, like tint color, in more natural way than just some script variable.
 The MVVM pattern (mentioned below) allows to expose functionality of the Grid Cell to editor and split responsibility for rendering, animations etc. into individual components, that would listen to the view model changes.
 
 Addressables are just for swag, there is literally no need to add them right now and to be honest I think that excluding them would make this easier, but hey, thats me. The issue with them is, that they need to pre-load or load async at startup which requires all other logic to hold. Also see **Entry scene** below which serves as splash screen.
@@ -76,6 +76,10 @@ is used to separate the actual logic that has to be tested within objects derive
 See for ex: 
 - [GridCellRenderer](AStartUnity/Assets/Scripts/Runtime/Grid/Presenters/GridCellRenderer.cs)
 - [GridCellRendererWrapper](AStartUnity/Assets/Scripts/Runtime/Grid/Presenters/GridCellRendererWrapper.cs)
+
+### Facade Pattern
+exposes business logic to Unity Editor. This way we can utilize the components via Unity API, either via direct ref editor time or in playmode via `FindObject` methods.
+See: [GridCellFacade.cs](AStartUnity/Assets/Scripts/Runtime/Grid/Presenters/GridCellFacade.cs)
 
 ### MVVM
 only for the cells which are defined as static and doesn't require regular tick per-instance.
