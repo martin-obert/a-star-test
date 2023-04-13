@@ -102,6 +102,11 @@ Only knows about the data layer. Repositories then can be simply stubed, when we
 ### Dependency Inejction
 - this might be my personal issue with static singletons, but DI allowed me to mock 
 
+## 3rd party libraries
+- Moq - creation of stubs within the tests
+- UniTask - essential, allows better async management
+- UniRx - helped to decouple UI from the rest of the systems, mainly used for the Pub/Sub
+
 ## Phase 1 - Prototype
 
 - spawn grid from the hexa prefab
