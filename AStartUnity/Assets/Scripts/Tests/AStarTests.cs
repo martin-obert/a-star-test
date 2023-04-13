@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using PathFinding;
+using Runtime;
 using Runtime.Grid;
-using Runtime.Grid.Data;
-using Runtime.Grid.Presenters;
+using Runtime.Grid.Models;
 using Runtime.Grid.Services;
-using Runtime.Terrains;
 using UnityEngine;
 
 namespace Tests
@@ -23,7 +22,7 @@ namespace Tests
                 for (var colIndex = 0; colIndex < testData.Length; colIndex++)
                 {
                     var data = testData[colIndex];
-                    result[rowIndex * source.Count + colIndex] = new GridCellViewModel(new GridCellSave
+                    result[rowIndex * source.Count + colIndex] = new GridCellViewModel(new GridCellDataModel
                     {
                         ColIndex = colIndex,
                         RowIndex = rowIndex,

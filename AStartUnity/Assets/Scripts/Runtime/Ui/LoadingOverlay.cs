@@ -1,4 +1,5 @@
 ﻿using System;
+using Runtime.DependencyInjection;
 using Runtime.Grid.Services;
 using Runtime.Messaging;
 using Runtime.Messaging.Events;
@@ -22,7 +23,7 @@ namespace Runtime.Ui
 
         private void Start()
         {
-           var eventSubscriber = Grid.Services.ServiceInjector.Instance.EventSubscriber;
+           var eventSubscriber = ServiceInjector.Instance.EventSubscriber;
 
             eventSubscriber.OnGamePreloadingInfo()
                 .ObserveOnMainThread()

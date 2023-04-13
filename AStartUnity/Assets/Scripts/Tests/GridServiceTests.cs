@@ -4,9 +4,10 @@ using System.Linq;
 using Moq;
 using NUnit.Framework;
 using Runtime.Grid;
-using Runtime.Grid.Data;
+using Runtime.Grid.Integrations;
+using Runtime.Grid.Models;
 using Runtime.Grid.Services;
-using Runtime.Terrains;
+using Runtime.Services;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -15,12 +16,12 @@ namespace Tests
     public class GridServiceTests
     {
         private Mock<IAddressableManager> _addressableManagerMock;
-        private Mock<IPrefabInstantiator> _prefabInstantiatorMock;
+        private Mock<IPrefabInstantiatorService> _prefabInstantiatorMock;
 
         [SetUp]
         public void SetupTest()
         {
-            _prefabInstantiatorMock = new Mock<IPrefabInstantiator>();
+            _prefabInstantiatorMock = new Mock<IPrefabInstantiatorService>();
             _addressableManagerMock = new Mock<IAddressableManager>();
             var terrainVariantMock = new Mock<ITerrainVariant>();
             _addressableManagerMock.Setup(x => x.GetTerrainVariantByType(It.IsAny<TerrainType>()))
@@ -48,7 +49,7 @@ namespace Tests
         {
             var gridService = new GridService(_prefabInstantiatorMock.Object, _addressableManagerMock.Object);
 
-            gridService.InstantiateGrid(1, 1, new[] { new GridCellSave { TerrainType = TerrainType.Grass } });
+            gridService.InstantiateGrid(1, 1, new[] { new GridCellDataModel { TerrainType = TerrainType.Grass } });
 
             Assert.That(gridService.Cells, Has.Length.EqualTo(1));
 
@@ -65,13 +66,13 @@ namespace Tests
                 new TestCaseData(0, -1, null),
                 new TestCaseData(-1, 0, null),
                 new TestCaseData(-1, -1, null),
-                new TestCaseData(1, 1, Array.Empty<GridCellSave>()),
+                new TestCaseData(1, 1, Array.Empty<GridCellDataModel>()),
                 new TestCaseData(1, 1, null),
             };
         }
 
         [TestCaseSource(nameof(GridService_GenerateGrid_ArgumentFailData))]
-        public void GenerateGrid_ArgumentFail(int rows, int cols, GridCellSave[] cells)
+        public void GenerateGrid_ArgumentFail(int rows, int cols, GridCellDataModel[] cells)
         {
             var gridService = new GridService(_prefabInstantiatorMock.Object, _addressableManagerMock.Object);
 
@@ -94,7 +95,7 @@ namespace Tests
 
             var gridService = new GridService(_prefabInstantiatorMock.Object, _addressableManagerMock.Object);
 
-            gridService.InstantiateGrid(1, 1, new[] { new GridCellSave { TerrainType = TerrainType.Grass } });
+            gridService.InstantiateGrid(1, 1, new[] { new GridCellDataModel { TerrainType = TerrainType.Grass } });
             gridService.UpdateHoveringCell(camera.Object, Vector2.one);
 
             Assert.IsTrue(gridService.Cells.First().IsHighlighted, "IsHighlighted");

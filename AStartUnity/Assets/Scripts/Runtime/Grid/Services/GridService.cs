@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Runtime.Gameplay;
-using Runtime.Grid.Data;
-using Runtime.Grid.Presenters;
+using Runtime.Grid.Integrations;
+using Runtime.Grid.Models;
+using Runtime.Pathfinding;
+using Runtime.Services;
 using UniRx;
 using UnityEngine;
 
@@ -15,7 +16,7 @@ namespace Runtime.Grid.Services
     internal sealed class GridService : IGridService, IDisposable
     {
         private IGridCellViewModel _hoverCellViewModel;
-        private readonly IPrefabInstantiator _prefabInstantiator;
+        private readonly IPrefabInstantiatorService _prefabInstantiatorService;
         private readonly IAddressableManager _addressableManager;
 
         public Rect Bounds { get; private set; }
@@ -30,10 +31,10 @@ namespace Runtime.Grid.Services
         private readonly PathfindingContext _pathfindingContext = new();
         private IGridCellViewModel[] _currentCells;
 
-        public GridService(IPrefabInstantiator prefabInstantiator, IAddressableManager addressableManager)
+        public GridService(IPrefabInstantiatorService prefabInstantiatorService, IAddressableManager addressableManager)
         {
             _addressableManager = addressableManager ?? throw new ArgumentNullException(nameof(addressableManager));
-            _prefabInstantiator = prefabInstantiator ?? throw new ArgumentNullException(nameof(prefabInstantiator));
+            _prefabInstantiatorService = prefabInstantiatorService ?? throw new ArgumentNullException(nameof(prefabInstantiatorService));
         }
 
         public void SelectHoveredCell()
@@ -101,7 +102,7 @@ namespace Runtime.Grid.Services
             }
         }
 
-        public void InstantiateGrid(int rowCount, int colCount, GridCellSave[] cells)
+        public void InstantiateGrid(int rowCount, int colCount, GridCellDataModel[] cells)
         {
             if (rowCount <= 0)
                 throw new ArgumentOutOfRangeException(nameof(rowCount), rowCount, "must be greater than 0");
@@ -114,6 +115,7 @@ namespace Runtime.Grid.Services
                 throw new InvalidOperationException("Sequence contains no elements. Empty cell array provided");
 
             _currentCells = new IGridCellViewModel[cells.Length];
+            
             for (var i = 0; i < _currentCells.Length && i < cells.Length; i++)
             {
                 var cell = cells[i];
@@ -123,7 +125,7 @@ namespace Runtime.Grid.Services
                 var terrainType = _addressableManager.GetTerrainVariantByType(cell.TerrainType);
                 var gridCellViewModel = new GridCellViewModel(cell, terrainType);
                 
-                _prefabInstantiator.InstantiateGridCell(gridCellViewModel);
+                _prefabInstantiatorService.InstantiateGridCell(gridCellViewModel);
                 _currentCells[i] = gridCellViewModel;
             }
 
