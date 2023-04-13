@@ -77,6 +77,10 @@ See for ex:
 - [GridCellRenderer](AStartUnity/Assets/Scripts/Runtime/Grid/Presenters/GridCellRenderer.cs)
 - [GridCellRendererWrapper](AStartUnity/Assets/Scripts/Runtime/Grid/Presenters/GridCellRendererWrapper.cs)
 
+### Facade Pattern
+exposes business logic to Unity Editor. This way we can utilize the components via Unity API, either via direct ref editor time or in playmode via `FindObject` methods.
+See: [GridCellFacade.cs](AStartUnity/Assets/Scripts/Runtime/Grid/Presenters/GridCellFacade.cs)
+
 ### MVVM
 only for the cells which are defined as static and doesn't require regular tick per-instance.
 
