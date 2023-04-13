@@ -1,8 +1,9 @@
 ﻿using System;
 using NUnit.Framework;
-using Runtime.Grid.Presenters;
+using Runtime;
+using Runtime.Grid;
+using Runtime.Grid.Models;
 using Runtime.Grid.Services;
-using Runtime.Terrains;
 
 namespace Tests
 {
@@ -11,7 +12,7 @@ namespace Tests
         [Test]
         public void GridCellDataModel_Pass()
         {
-            var data = new GridCellSave
+            var data = new GridCellDataModel
             {
                 ColIndex = 0,
                 RowIndex = 0,
@@ -25,7 +26,7 @@ namespace Tests
         [TestCase(0, -1, TerrainType.Grass)]
         public void GridCellDataModel_InvalidRowIndex(int colIndex, int rowIndex, TerrainType type)
         {
-            var data = new GridCellSave
+            var data = new GridCellDataModel
             {
                 ColIndex = colIndex,
                 RowIndex = rowIndex,
@@ -40,7 +41,7 @@ namespace Tests
         [TestCase(-1, 0, TerrainType.Grass)]
         public void GridCellDataModel_InvalidColIndex(int colIndex, int rowIndex, TerrainType type)
         {
-            var data = new GridCellSave
+            var data = new GridCellDataModel
             {
                 ColIndex = colIndex,
                 RowIndex = rowIndex,
@@ -55,7 +56,7 @@ namespace Tests
         [TestCase(0, 0, TerrainType.Unknown)]
         public void GridCellDataModel_InvalidTerrainType(int colIndex, int rowIndex, TerrainType type)
         {
-            var data = new GridCellSave
+            var data = new GridCellDataModel
             {
                 ColIndex = colIndex,
                 RowIndex = rowIndex,

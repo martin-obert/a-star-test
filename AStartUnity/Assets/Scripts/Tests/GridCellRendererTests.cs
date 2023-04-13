@@ -1,8 +1,9 @@
 ﻿using Moq;
 using NUnit.Framework;
-using Runtime.Grid.Presenters;
+using Runtime.Grid.Integrations;
+using Runtime.Grid.Models;
 using Runtime.Grid.Services;
-using Runtime.Terrains;
+using Runtime.Services;
 using UnityEngine;
 
 namespace Tests
@@ -23,7 +24,7 @@ namespace Tests
         [Test]
         public void Controller_Pass()
         {
-            var viewModelMock = new GridCellViewModel(new GridCellSave{TerrainType = TerrainType.Desert}, new Mock<ITerrainVariant>().Object);
+            var viewModelMock = new GridCellViewModel(new GridCellDataModel{TerrainType = TerrainType.Desert}, new Mock<ITerrainVariant>().Object);
             var terrainVariantRendererMock = new Mock<IGridCellRenderer>();
 
             var controller = new GridCellRendererWrapper.Controller(

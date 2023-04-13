@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
-using Runtime.Grid.Data;
-using Runtime.Grid.Presenters;
+using Runtime.Grid.Integrations;
+using Runtime.Grid.Models;
 using Runtime.Grid.Services;
-using Runtime.Terrains;
 using UnityEngine;
 using Assert = UnityEngine.Assertions.Assert;
 
@@ -63,7 +62,7 @@ namespace Tests
 
 
             IGridCellViewModel viewModelMock =
-                new GridCellViewModel(new GridCellSave { TerrainType = TerrainType.Mountain }, terrainVariant);
+                new GridCellViewModel(new GridCellDataModel { TerrainType = TerrainType.Mountain }, terrainVariant);
 
             var controller = new GridCellTransformWrapper.Controller(viewModelMock, transformMock.Object,
                 configuration);
@@ -98,7 +97,7 @@ namespace Tests
 
 
             IGridCellViewModel viewModelMock =
-                new GridCellViewModel(new GridCellSave{TerrainType = TerrainType.Grass}, terrainVariant);
+                new GridCellViewModel(new GridCellDataModel{TerrainType = TerrainType.Grass}, terrainVariant);
 
             var controller = new GridCellTransformWrapper.Controller(viewModelMock, transformMock.Object,
                 configuration);
@@ -131,7 +130,7 @@ namespace Tests
 
 
             IGridCellViewModel viewModelMock =
-                new GridCellViewModel(new GridCellSave { TerrainType = TerrainType.Mountain }, terrainVariant);
+                new GridCellViewModel(new GridCellDataModel { TerrainType = TerrainType.Mountain }, terrainVariant);
 
             var controller = new GridCellTransformWrapper.Controller(viewModelMock, transformMock.Object,
                 configuration);
@@ -163,7 +162,7 @@ namespace Tests
 
 
             IGridCellViewModel viewModelMock =
-                new GridCellViewModel(new GridCellSave{TerrainType = TerrainType.Grass}, terrainVariant);
+                new GridCellViewModel(new GridCellDataModel{TerrainType = TerrainType.Grass}, terrainVariant);
 
             var controller = new GridCellTransformWrapper.Controller(viewModelMock, transformMock.Object,
                 configuration);
@@ -199,7 +198,7 @@ namespace Tests
 
 
             IGridCellViewModel viewModelMock =
-                new GridCellViewModel(new GridCellSave { TerrainType = TerrainType.Grass }, terrainVariant);
+                new GridCellViewModel(new GridCellDataModel { TerrainType = TerrainType.Grass }, terrainVariant);
 
             var controller = new GridCellTransformWrapper.Controller(viewModelMock, transformMock.Object,
                 configuration);

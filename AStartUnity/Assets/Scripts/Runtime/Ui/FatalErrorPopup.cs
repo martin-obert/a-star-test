@@ -1,4 +1,5 @@
 ﻿using System;
+using Runtime.DependencyInjection;
 using Runtime.Grid.Services;
 using Runtime.Messaging;
 using Runtime.Messaging.Events;
@@ -18,7 +19,7 @@ namespace Runtime.Ui
         
         private void Start()
         {
-            _eventSubscriber = Grid.Services.ServiceInjector.Instance.EventSubscriber;
+            _eventSubscriber = ServiceInjector.Instance.EventSubscriber;
 
             _subHook?.Dispose();
             

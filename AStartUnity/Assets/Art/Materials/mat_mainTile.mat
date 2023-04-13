@@ -96,8 +96,9 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 1
     - _IsWalkable: 1
-    - _Is_Hovered: 1
-    - _Is_Selected: 1
+    - _Is_Hovered: 0
+    - _Is_Selected: 0
+    - _Is_Walkable: 0
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
